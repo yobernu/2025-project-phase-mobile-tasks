@@ -12,8 +12,8 @@ void main() {
   pm.viewSingleProduct("book");
 
   print("\nUpdate Product (book):");
-  pm.updateProduct("book", "updated-book", 150);
-  pm.viewSingleProduct("book");
+  pm.updateProduct("book", "math", "updated-book", 150);
+  pm.viewSingleProduct("math");
 
   print("\nDelete Product (pen):");
   pm.deleteProduct("pen");
@@ -58,13 +58,13 @@ class ProductManager {
     print("Product '$name' not found.");
   }
 
-  void updateProduct(String name, String description, int price) {
+  void updateProduct(String firstName, name, String description, int price) {
     for (var pro in products) {
-      if (pro.name == name) {
+      if (pro.name == firstName) {
         pro.name = name;
         pro.description = description;
         pro.price = price;
-        print("Product '$name' updated successfully.");
+        print("Product '$firstName' updated successfully.");
         return;
       }
     }
