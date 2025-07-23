@@ -88,9 +88,9 @@ class ProductManager {
 
 
 
-/ Enum that enumerates the different planets in our solar system
-/ and some of their properties.
-/ 
+// / Enum that enumerates the different planets in our solar system
+// / and some of their properties.
+// / 
 
 
 
@@ -129,14 +129,14 @@ enum Planet {
 }
 
 
-void main() {
+// void main() {
   
-final yourPlanet = Planet.uranus;
+// final yourPlanet = Planet.uranus;
 
-if (!yourPlanet.isGiant) {
-  print('Your planet is not a "giant planet".');
-} 
-else {
-  print("your planet $yourPlanet is giant planet");
-}
-}
+// if (!yourPlanet.isGiant) {
+//   print('Your planet is not a "giant planet".');
+// } 
+// else {
+//   print("your planet $yourPlanet is giant planet");
+// }
+// }
