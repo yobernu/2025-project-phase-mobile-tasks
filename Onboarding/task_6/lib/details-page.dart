@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:task_6/delete.dart';
 import 'update-page.dart';
 
 class DetailsPage extends StatefulWidget {
+  final String id;
   final String imagePath;
   final String title;
   final String subtitle;
@@ -10,8 +12,10 @@ class DetailsPage extends StatefulWidget {
   final List<String> sizes;
   final String description;
 
+
   const DetailsPage({
     super.key,
+    required this.id,
     required this.imagePath,
     required this.title,
     required this.subtitle,
@@ -36,12 +40,16 @@ class _DetailsPageState extends State<DetailsPage> {
             clipBehavior: Clip.antiAlias,
             alignment: Alignment.topLeft,
             children: [
-              ClipRRect(
+              SizedBox(
+                height: 280,
+                width: double.infinity,
+                child: ClipRRect(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(40),
                   topRight: Radius.circular(40),
                 ),
                 child: Image.asset(widget.imagePath, fit: BoxFit.cover),
+              ),
               ),
               GestureDetector(
                 onTap: () {
@@ -202,13 +210,18 @@ class _DetailsPageState extends State<DetailsPage> {
                       width: 1,
                     ),
                   ),
-                  child: Text(
+                  child: GestureDetector(
+                    onTap: () {
+                      deleteProduct(widget.id);
+                    },
+                    child: Text(
                     "DELETE",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: Color.fromRGBO(255, 19, 19, 0.79),
                     ),
+                  ),
                   ),
                 ),
 
@@ -227,7 +240,17 @@ class _DetailsPageState extends State<DetailsPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => UpdatePage()),
+                        MaterialPageRoute(
+                          builder: (context) => UpdatePage(
+                          imagePath: widget.imagePath,
+                          title:  widget.title,
+                          price:  widget.price,
+                          subtitle:   widget.subtitle,  
+                          rating:  widget.rating,
+                          sizes:  widget.sizes,
+                          description:  widget.description,
+                          id: widget.id
+                        )),
                       );
                     },
                     child: Text(

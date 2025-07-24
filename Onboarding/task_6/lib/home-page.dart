@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'details-page.dart';
 import 'product.dart';
-import 'search-page.dart';
+// import 'search-page.dart';
 
-final Product product = Product.product1; 
+var allProduct = ProductList.products; 
+var count = allProduct.length;
+
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -97,7 +99,7 @@ class MyHomePage extends StatelessWidget {
                         ),
                       child: GestureDetector(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=> SearchPage()));
+                          // Navigator.push(context, MaterialPageRoute(builder: (context)=> SearchPage()));
                         },
                         child: Icon(Icons.search, color: Color.fromRGBO(221, 221, 221, 1),),
                       ),
@@ -112,7 +114,7 @@ class MyHomePage extends StatelessWidget {
                 childAspectRatio: 3 / 2,
                 shrinkWrap: true, 
                 physics: NeverScrollableScrollPhysics(),
-                children: _buildGridCard(context, product,  10),
+                children: _buildGridCard(context, allProduct),
               ),
             ],
           ),
@@ -124,8 +126,9 @@ class MyHomePage extends StatelessWidget {
 
 
 
-List<Widget> _buildGridCard(BuildContext context, Product product,  int count) {
+List<Widget> _buildGridCard(BuildContext context, List<Product> prods) {
   return List.generate(count, (int index) {
+    var product = allProduct[index];
     var column = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -135,6 +138,7 @@ List<Widget> _buildGridCard(BuildContext context, Product product,  int count) {
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailsPage(
+                      id: product.id,
                       imagePath: product.imagePath,
                       title: product.title,
                       price: product.price,
@@ -142,6 +146,7 @@ List<Widget> _buildGridCard(BuildContext context, Product product,  int count) {
                       rating: product.rating,
                       sizes: product.sizes,
                       description: product.description,
+                      
                     ),
                   ),
                 );
@@ -218,6 +223,13 @@ List<Widget> _buildGridCard(BuildContext context, Product product,  int count) {
     );
   });
 }
+
+
+
+
+
+
+
 
 
 

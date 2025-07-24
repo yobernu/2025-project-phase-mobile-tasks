@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home-page.dart';
-import 'update-page.dart';
-import 'search-page.dart';
+// import 'update-page.dart';
+// import 'search-page.dart';
 
 void main() {
   runApp(const MyApp());
