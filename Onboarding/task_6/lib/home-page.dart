@@ -1,23 +1,31 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'details-page.dart';
+import 'package:provider/provider.dart';
 import 'product.dart';
-// import 'search-page.dart';
+import 'user-data.dart';
+import 'product_manager.dart';
+import 'product-list.dart';
 
-var allProduct = ProductList.products; 
-var count = allProduct.length;
-
-
-class MyHomePage extends StatelessWidget {
+// imagepath
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
   @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
   Widget build(BuildContext context) {
+    final productManager = Provider.of<ProductManager>(context);
+    final products = productManager.products;
+
     return Container(
       padding: EdgeInsets.all(16),
       color: const Color.fromARGB(255, 255, 255, 255),
       child: Scaffold(
-        // backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         appBar: AppBar(
+          backgroundColor: Colors.white,
           leading: Container(
             width: 50,
             height: 50,
@@ -31,10 +39,10 @@ class MyHomePage extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: RichText(
-                text: TextSpan(
-                  text: "July 14, 2023",
-                  style: TextStyle(fontSize: 11, color: Colors.blueGrey),
-                    ),
+                  text: TextSpan(
+                    text: "July 14, 2023",
+                    style: TextStyle(fontSize: 11, color: Colors.blueGrey),
+                  ),
                 ),
               ),
               Container(
@@ -42,17 +50,17 @@ class MyHomePage extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: RichText(
-                  text: TextSpan(
-                    text: "Hello, ",
-                    style: TextStyle(color: Colors.black),
-                    children: [
-                      TextSpan(
-                        text: "Yohannes",
-                        style: TextStyle(fontWeight: FontWeight.bold,),
-                      ),
-                    ],
+                    text: TextSpan(
+                      text: "Hello, ",
+                      style: TextStyle(color: Colors.black),
+                      children: [
+                        TextSpan(
+                          text: userData.getUserName(),
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 ),
               ),
             ],
@@ -73,172 +81,96 @@ class MyHomePage extends StatelessWidget {
             ),
           ],
         ),
-       body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        body: products.isEmpty
+            ? Center(child: Text('No products available'))
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Available Products',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
+                    Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Available Products',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Color.fromRGBO(221, 221, 221, 1),
+                              ),
+                            ),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/search');
+                              },
+                              child: Icon(
+                                Icons.search,
+                                color: Color.fromRGBO(221, 221, 221, 1),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color.fromRGBO(221, 221, 221, 1)),
-                        ),
-                      child: GestureDetector(
-                        onTap: (){
-                          // Navigator.push(context, MaterialPageRoute(builder: (context)=> SearchPage()));
+                    Builder(
+                      builder: (context) => GridView.count(
+                        crossAxisCount: 1,
+                        childAspectRatio: 3 / 2,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        children: buildGridCard(context),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/add-product');
                         },
-                        child: Icon(Icons.search, color: Color.fromRGBO(221, 221, 221, 1),),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 44,
+                            vertical: 12,
+                          ),
+                          backgroundColor: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          side: const BorderSide(
+                            color: Color.fromRGBO(132, 129, 129, 0.788),
+                            width: 1,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Center(
+                            child: const Text(
+                              "Add Product",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Color.fromRGBO(255, 255, 255, 0.788),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // 🧱 Grid View Section
-              GridView.count(
-                crossAxisCount: 1,
-                childAspectRatio: 3 / 2,
-                shrinkWrap: true, 
-                physics: NeverScrollableScrollPhysics(),
-                children: _buildGridCard(context, allProduct),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
 }
-
-
-
-List<Widget> _buildGridCard(BuildContext context, List<Product> prods) {
-  return List.generate(count, (int index) {
-    var product = allProduct[index];
-    var column = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-             onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailsPage(
-                      id: product.id,
-                      imagePath: product.imagePath,
-                      title: product.title,
-                      price: product.price,
-                      subtitle:  product.subtitle,  
-                      rating: product.rating,
-                      sizes: product.sizes,
-                      description: product.description,
-                      
-                    ),
-                  ),
-                );
-              },
-              child: SizedBox(
-              height: 165,
-              child: Image.asset(
-                product.imagePath,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-
-          
-          Padding(
-            padding: const EdgeInsets.fromLTRB(26, 8, 26, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          product.title,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                        Spacer(),
-                        Text(
-                          product.price,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                      child: Row(
-                        children: [
-                          Text(
-                            product.subtitle,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Spacer(),
-                          Icon(Icons.star, color: Colors.amber),
-                          Text('(${product.rating})', textAlign: TextAlign.end),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.0),
-      child: Card(
-
-      clipBehavior: Clip.antiAlias, 
-      child: column,
-      ),
-    );
-  });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
