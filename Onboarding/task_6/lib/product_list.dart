@@ -1,20 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'product.dart';
 import 'product_manager.dart';
 
 List<Widget> buildGridCard(BuildContext context) {
-  final productManager = Provider.of<ProductManager>(context);
-  final products = productManager.products;
+  final ProductManager productManager = Provider.of<ProductManager>(context);
+  final List<Product> products = productManager.products;
 
-  return List.generate(products.length, (int index) {
-    final product = products[index];
+  return List<Widget>.generate(products.length, (int index) {
+    final Product product = products[index];
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
           context,
           '/details',
-          arguments: {
+          arguments: <String, Object>{
             'id': product.id,
             'imagePath': product.imagePath,
             'title': product.title,
@@ -28,12 +29,12 @@ List<Widget> buildGridCard(BuildContext context) {
       },
       child: Container(
         color: Colors.white,
-        padding: EdgeInsets.only(bottom: 8.0),
+        padding: const EdgeInsets.only(bottom: 8.0),
         child: Card(
           clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               SizedBox(
                 height: 165,
                 child: product.imagePath.startsWith('images/')
@@ -52,21 +53,21 @@ List<Widget> buildGridCard(BuildContext context) {
                 padding: const EdgeInsets.fromLTRB(26, 8, 26, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Row(
-                      children: [
+                      children: <Widget>[
                         Text(
                           product.title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w500,
-                            fontFamily: "Poppins",
+                            fontFamily: 'Poppins',
                           ),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         Text(
                           product.price,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
                           ),
@@ -74,18 +75,18 @@ List<Widget> buildGridCard(BuildContext context) {
                       ],
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                       child: Row(
-                        children: [
+                        children: <Widget>[
                           Text(
                             product.subtitle,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
-                          Spacer(),
-                          Icon(Icons.star, color: Colors.amber),
+                          const Spacer(),
+                          const Icon(Icons.star, color: Colors.amber),
                           Text('(${product.rating})', textAlign: TextAlign.end),
                         ],
                       ),

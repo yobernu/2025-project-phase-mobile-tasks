@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';  // This imports ChangeNotifier
 import 'product.dart';
 
 class ProductManager with ChangeNotifier {
-  List<Product> _products = [];
+  List<Product> _products = <Product>[];
 
   ProductManager() {
-    _products = List.from(ProductList.products);
+    _products = List<Product>.from(ProductList.products);
   }
 
   List<Product> get products => _products;
@@ -15,7 +15,7 @@ class ProductManager with ChangeNotifier {
       throw ArgumentError('Product must have title and price');
     }
     
-    if (products.any((p) => p.title == prod.title)) {
+    if (products.any((Product p) => p.title == prod.title)) {
       throw StateError('Product with this name already exists');
     }
     
@@ -24,12 +24,12 @@ class ProductManager with ChangeNotifier {
   }
 
   void deleteProduct(String id) {
-    _products.removeWhere((pro) => pro.id == id);
+    _products.removeWhere((Product pro) => pro.id == id);
     notifyListeners();
   }
 
   void updateProduct(Product updatedProduct) {
-    final index = _products.indexWhere((p) => p.id == updatedProduct.id);
+    final int index = _products.indexWhere((Product p) => p.id == updatedProduct.id);
     if (index != -1) {
       _products[index] = updatedProduct;
       notifyListeners();

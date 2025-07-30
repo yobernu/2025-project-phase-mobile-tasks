@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'user-data.dart';
+import 'product.dart';
+import 'product_list.dart';
 import 'product_manager.dart';
-import 'product-list.dart';
+import 'user_data.dart';
 
-// imagepath
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -15,11 +15,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    final productManager = Provider.of<ProductManager>(context);
-    final products = productManager.products;
+    final ProductManager productManager = Provider.of<ProductManager>(context);
+    final List<Product> products = productManager.products;
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       color: const Color.fromARGB(255, 255, 255, 255),
       child: Scaffold(
         appBar: AppBar(
@@ -29,32 +29,32 @@ class _MyHomePageState extends State<MyHomePage> {
             height: 50,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(11),
-              color: Color.fromRGBO(204, 204, 204, 1),
+              color: const Color.fromRGBO(204, 204, 204, 1),
             ),
           ),
           title: Column(
-            children: [
+            children: <Widget>[
               Align(
                 alignment: Alignment.centerLeft,
                 child: RichText(
-                  text: TextSpan(
-                    text: "July 14, 2023",
+                  text: const TextSpan(
+                    text: 'July 14, 2023',
                     style: TextStyle(fontSize: 11, color: Colors.blueGrey),
                   ),
                 ),
               ),
               Container(
-                padding: EdgeInsets.only(top: 5),
+                padding: const EdgeInsets.only(top: 5),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: RichText(
                     text: TextSpan(
-                      text: "Hello, ",
-                      style: TextStyle(color: Colors.black),
-                      children: [
-                        TextSpan(
+                      text: 'Hello, ',
+                      style: const TextStyle(color: Colors.black),
+                      children: <InlineSpan>[
+                         TextSpan(
                           text: userData.getUserName(),
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -63,16 +63,16 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
           ),
-          actions: [
+          actions: <Widget>[
             Container(
-              margin: EdgeInsets.only(right: 8),
+              margin: const EdgeInsets.only(right: 8),
               width: 40,
               height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Color.fromRGBO(221, 221, 221, 1)),
+                border: Border.all(color: const Color.fromRGBO(221, 221, 221, 1)),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.notifications_none,
                 color: Color.fromRGBO(221, 221, 221, 1),
               ),
@@ -80,18 +80,18 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         body: products.isEmpty
-            ? Center(child: Text('No products available'))
+            ? const Center(child: Text('No products available'))
             : SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Container(
                       color: Colors.white,
                       padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
+                        children: <Widget>[
+                          const Text(
                             'Available Products',
                             style: TextStyle(
                               fontSize: 22,
@@ -105,14 +105,14 @@ class _MyHomePageState extends State<MyHomePage> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Color.fromRGBO(221, 221, 221, 1),
+                                color: const Color.fromRGBO(221, 221, 221, 1),
                               ),
                             ),
                             child: GestureDetector(
                               onTap: () {
                                 Navigator.pushNamed(context, '/search');
                               },
-                              child: Icon(
+                              child: const Icon(
                                 Icons.search,
                                 color: Color.fromRGBO(221, 221, 221, 1),
                               ),
@@ -122,16 +122,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     Builder(
-                      builder: (context) => GridView.count(
+                      builder: (BuildContext context) => GridView.count(
                         crossAxisCount: 1,
                         childAspectRatio: 3 / 2,
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         children: buildGridCard(context),
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: TextButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/add-product');
@@ -147,14 +147,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           side: const BorderSide(
                             color: Color.fromRGBO(132, 129, 129, 0.788),
-                            width: 1,
                           ),
                         ),
-                        child: Padding(
+                        child: const Padding(
                           padding: EdgeInsets.all(8),
                           child: Center(
-                            child: const Text(
-                              "Add Product",
+                            child: Text(
+                              'Add Product',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,

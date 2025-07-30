@@ -1,40 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'product.dart';
 import 'product_manager.dart';
 
-class UpdatePage extends StatefulWidget {
-  final String id;
-  final String imagePath;
-  final String title;
-  final String subtitle;
-  final String price;
-  final String rating;
-  final List<String> sizes;
-  final String description;
-
-  const UpdatePage({
-    super.key,
-    required this.id,
-    required this.imagePath,
-    required this.title,
-    required this.subtitle,
-    required this.price,
-    required this.rating,
-    required this.sizes,
-    required this.description,
-  });
+class AddProductPage extends StatefulWidget {
+  const AddProductPage({super.key});
 
   @override
-  State<UpdatePage> createState() => _UpdatePageState();
+  State<AddProductPage> createState() => _AddProductPageState();
 }
-// navigator
-class _UpdatePageState extends State<UpdatePage> {
-  final _formKey = GlobalKey<FormState>();
+
+class _AddProductPageState extends State<AddProductPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController titleController;
   late TextEditingController subtitleController;
   late TextEditingController priceController;
@@ -47,12 +28,12 @@ class _UpdatePageState extends State<UpdatePage> {
   @override
   void initState() {
     super.initState();
-    titleController = TextEditingController(text: widget.title);
-    subtitleController = TextEditingController(text: widget.subtitle);
-    priceController = TextEditingController(text: widget.price);
-    descriptionController = TextEditingController(text: widget.description);
-    ratingController = TextEditingController(text: widget.rating);
-    sizeController = TextEditingController(text: widget.sizes.join(', '));
+    titleController = TextEditingController();
+    subtitleController = TextEditingController();
+    priceController = TextEditingController();
+    descriptionController = TextEditingController();
+    ratingController = TextEditingController();
+    sizeController = TextEditingController();
   }
 
   @override
@@ -67,15 +48,19 @@ class _UpdatePageState extends State<UpdatePage> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile != null) {
       setState(() => _isLoading = true);
       try {
-        final appDir = await getApplicationDocumentsDirectory();
-        final fileName = p.basename(pickedFile.path);
-        final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+        final Directory appDir = await getApplicationDocumentsDirectory();
+        final String fileName = p.basename(pickedFile.path);
+        final File savedImage = await File(
+          pickedFile.path,
+        ).copy('${appDir.path}/$fileName');
         setState(() => _imageFile = savedImage);
       } catch (e) {
         _showSnackBar('Error saving image: $e');
@@ -87,70 +72,49 @@ class _UpdatePageState extends State<UpdatePage> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_imageFile == null) {
+      _showSnackBar('Please select an image');
+      return;
+    }
 
     setState(() => _isLoading = true);
     try {
-      final updatedProduct = Product(
-        id: widget.id,
-        imagePath: _imageFile?.path ?? widget.imagePath,
+      final Product newProduct = Product(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        imagePath: _imageFile!.path,
         title: titleController.text.trim(),
         subtitle: subtitleController.text.trim(),
         price: priceController.text.trim(),
         rating: ratingController.text.trim(),
-        sizes: sizeController.text.split(',').map((s) => s.trim()).toList(),
+        sizes: sizeController.text
+            .split(',')
+            .map((String s) => s.trim())
+            .toList(),
         description: descriptionController.text.trim(),
       );
 
-      final productManager = Provider.of<ProductManager>(context, listen: false);
-      productManager.updateProduct(updatedProduct);
-      
-      if (mounted) Navigator.popUntil(context, ModalRoute.withName('/'));
+      final ProductManager productManager = Provider.of<ProductManager>(
+        context,
+        listen: false,
+      );
+      productManager.addProduct(newProduct);
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      _showSnackBar('Error updating product: $e');
+      _showSnackBar('Error adding product: $e');
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  void _deleteProduct() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this product?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.popUntil(context, ModalRoute.withName('/')),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.popUntil(context, ModalRoute.withName('/'));
-              setState(() => _isLoading = true);
-              try {
-                final productManager = Provider.of<ProductManager>(
-                  context, 
-                  listen: false
-                );
-                productManager.deleteProduct(widget.id);
-                if (mounted) Navigator.popUntil(context, ModalRoute.withName('/'));
-              } catch (e) {
-                _showSnackBar('Error deleting product: $e');
-              } finally {
-                if (mounted) setState(() => _isLoading = false);
-              }
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -166,12 +130,12 @@ class _UpdatePageState extends State<UpdatePage> {
         ),
         centerTitle: true,
         title: const Text(
-          "Update Product",
+          'Add New Product',
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF3E3E3E),
             fontWeight: FontWeight.w500,
-            fontFamily: "Poppins",
+            fontFamily: 'Poppins',
           ),
         ),
       ),
@@ -182,7 +146,7 @@ class _UpdatePageState extends State<UpdatePage> {
               child: SafeArea(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  children: [
+                  children: <Widget>[
                     GestureDetector(
                       onTap: _pickImage,
                       child: Container(
@@ -196,48 +160,41 @@ class _UpdatePageState extends State<UpdatePage> {
                                   image: FileImage(_imageFile!),
                                   fit: BoxFit.cover,
                                 )
-                              : widget.imagePath.isNotEmpty
-                                  ? DecorationImage(
-                                      image: widget.imagePath.startsWith('assets/')
-                                          ? AssetImage(widget.imagePath)
-                                          : FileImage(File(widget.imagePath)),
-                                      fit: BoxFit.cover,
-                                    )
-                                  : null,
+                              : null,
                         ),
-                        child: _imageFile == null && widget.imagePath.isEmpty
+                        child: _imageFile == null
                             ? const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                                children: <Widget>[
                                   Icon(Icons.image, size: 48),
                                   SizedBox(height: 8),
-                                  Text("Upload image"),
+                                  Text('Upload image'),
                                 ],
                               )
                             : null,
                       ),
                     ),
 
-                    _buildFormField("Name", titleController),
-                    _buildFormField("Category", subtitleController),
+                    _buildFormField('Name', titleController),
+                    _buildFormField('Category', subtitleController),
                     _buildFormField(
-                      "Price",
+                      'Price',
                       priceController,
                       prefixIcon: Icons.attach_money,
                       keyboardType: TextInputType.number,
                     ),
                     _buildFormField(
-                      "Sizes (comma separated)",
+                      'Sizes (comma separated)',
                       sizeController,
-                      hint: "39, 40, 41, etc.",
+                      hint: '39, 40, 41, etc.',
                     ),
                     _buildFormField(
-                      "Rating",
+                      'Rating',
                       ratingController,
                       keyboardType: TextInputType.number,
                     ),
                     _buildFormField(
-                      "Description",
+                      'Description',
                       descriptionController,
                       maxLines: 5,
                     ),
@@ -256,33 +213,9 @@ class _UpdatePageState extends State<UpdatePage> {
                           ),
                         ),
                         child: const Text(
-                          "SAVE CHANGES",
+                          'ADD PRODUCT',
                           style: TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                      child: OutlinedButton(
-                        onPressed: _deleteProduct,
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Colors.red,
-                            width: 1,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "DELETE PRODUCT",
-                          style: TextStyle(
-                            color: Colors.red,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -307,13 +240,10 @@ class _UpdatePageState extends State<UpdatePage> {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -331,7 +261,7 @@ class _UpdatePageState extends State<UpdatePage> {
                 vertical: 12,
               ),
             ),
-            validator: (value) {
+            validator: (String? value) {
               if (value == null || value.trim().isEmpty) {
                 return 'This field is required';
               }

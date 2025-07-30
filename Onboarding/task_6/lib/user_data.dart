@@ -10,4 +10,4 @@ class UserData {
     return userName;
   }
 }
-final UserData userData = UserData(userName: "Yohannes");
+final UserData userData = UserData(userName: 'Yohannes');

@@ -1,18 +1,22 @@
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'home-page.dart';
-import 'details-page.dart';
-import 'update-page.dart';
-import 'search-page.dart';
-import 'add-product.dart';
+import 'add_product.dart';
+import 'details_page.dart';
+import 'home_page.dart';
 import 'product_manager.dart';
+import 'search_page.dart';
+import 'update_page.dart';
+
+
+
 
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ProductManager(),
-      child: MyApp(),
+    ChangeNotifierProvider<ProductManager>(
+      create: (BuildContext context) => ProductManager(),
+      child: const MyApp(),
     ),
   );
 }
@@ -31,11 +35,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      routes: {
-        '/': (context) => MyHomePage(),
-        '/details': (context) {
-          print('[DEBUG] Building DetailsPage route');
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) => const MyHomePage(),
+        '/details': (BuildContext context) {
+          dev.log('[DEBUG] Building DetailsPage route');
+          final Map<String, dynamic> args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return DetailsPage(
             id: args['id'],
             imagePath: args['imagePath'],
@@ -47,8 +51,8 @@ class MyApp extends StatelessWidget {
             description: args['description'],
           );
         },
-        '/update': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+        '/update': (BuildContext context) {
+          final Map<String, dynamic> args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return UpdatePage(
             id: args['id'],
             imagePath: args['imagePath'],
@@ -61,8 +65,8 @@ class MyApp extends StatelessWidget {
             
           );
         },
-        '/search': (context) => SearchPage(),
-        '/add-product': (context) => AddProductPage(),
+        '/search': (BuildContext context) => const SearchPage(),
+        '/add-product': (BuildContext context) => const AddProductPage(),
       },
     );
   }

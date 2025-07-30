@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_6/product_manager.dart';
+import './product_manager.dart';
 
 class DetailsPage extends StatefulWidget {
   final String id;
@@ -39,10 +39,10 @@ class _DetailsPageState extends State<DetailsPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            children: [
+            children: <Widget>[
               Stack(
                 alignment: Alignment.topLeft,
-                children: [
+                children: <Widget>[
                   SizedBox(
                     height: 280,
                     width: double.infinity,
@@ -83,9 +83,9 @@ class _DetailsPageState extends State<DetailsPage> {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Row(
-                      children: [
+                      children: <Widget>[
                         Text(
                           widget.subtitle,
                           style: const TextStyle(
@@ -96,20 +96,20 @@ class _DetailsPageState extends State<DetailsPage> {
                         ),
                         const Spacer(),
                         Row(
-                          children: [
+                          children: <Widget>[
                             const Icon(
                               Icons.star,
                               color: Color.fromARGB(255, 255, 215, 1),
                               size: 20,
                             ),
-                            Text("(${widget.rating})"),
+                            Text('(${widget.rating})'),
                           ],
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     Row(
-                      children: [
+                      children: <Widget>[
                         Text(
                           widget.title,
                           style: const TextStyle(
@@ -130,7 +130,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     ),
                     const SizedBox(height: 20),
                     const Text(
-                      "Size:",
+                      'Size:',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 20,
@@ -142,9 +142,9 @@ class _DetailsPageState extends State<DetailsPage> {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: widget.sizes.length,
-                        itemBuilder: (context, index) {
-                          final size = widget.sizes[index];
-                          final isSelected = selectedIndex == index;
+                        itemBuilder: (BuildContext context, int index) {
+                          final String size = widget.sizes[index];
+                          final bool isSelected = selectedIndex == index;
 
                           return GestureDetector(
                             onTap: () => setState(() => selectedIndex = index),
@@ -184,11 +184,11 @@ class _DetailsPageState extends State<DetailsPage> {
                     ),
                     const SizedBox(height: 24),
                     Row(
-                      children: [
+                      children: <Widget>[
                         // DELETE BUTTON
                         TextButton(
                           onPressed: () {
-                            final productManager = Provider.of<ProductManager>(
+                            final ProductManager productManager = Provider.of<ProductManager>(
                               context, 
                               listen: false
                             );
@@ -205,11 +205,10 @@ class _DetailsPageState extends State<DetailsPage> {
                             ),
                             side: const BorderSide(
                               color: Color.fromRGBO(255, 19, 19, 0.79),
-                              width: 1,
                             ),
                           ),
                           child: const Text(
-                            "DELETE",
+                            'DELETE',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
@@ -224,7 +223,7 @@ class _DetailsPageState extends State<DetailsPage> {
                             await Navigator.pushNamed(
                               context,
                               '/update',
-                              arguments: {
+                              arguments: <String, Object>{
                                 'id': widget.id,
                                 'imagePath': widget.imagePath,
                                 'title': widget.title,
@@ -252,7 +251,7 @@ class _DetailsPageState extends State<DetailsPage> {
                             ),
                           ),
                           child: const Text(
-                            "UPDATE",
+                            'UPDATE',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
