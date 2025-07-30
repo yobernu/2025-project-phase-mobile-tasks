@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';  // This imports ChangeNotifier
 import 'product.dart';
-import 'product-list.dart';
 
 class ProductManager with ChangeNotifier {
   List<Product> _products = [];

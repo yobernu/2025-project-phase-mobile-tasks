@@ -8,6 +8,8 @@ import 'product.dart';
 import 'product_manager.dart';
 
 class AddProductPage extends StatefulWidget {
+  const AddProductPage({super.key});
+
   @override
   State<AddProductPage> createState() => _AddProductPageState();
 }
