@@ -19,5 +19,3 @@ abstract class ProductRepository {
   Future<Either<Failure, void>> deleteProduct(int id);
 }
 
-
-// addProduct, deleteProduct, updateProduct, 
