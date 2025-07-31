@@ -38,6 +38,21 @@ dependencies:
   image_picker: ^1.0.7
   path_provider: ^2.1.2
   path: ^1.8.3
+  
+  # State management and dependency injection
+  get_it: ^7.6.7
+  flutter_bloc: ^8.1.4
+  equatable: ^2.0.5
+  
+  # Functional programming and error handling
+  dartz: ^0.10.1
+  
+  # Network and connectivity
+  connectivity: ^3.0.6
+  http: ^1.2.0
+  
+  # Local storage
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +64,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  
+  # Testing dependencies
+  mockito: ^5.4.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

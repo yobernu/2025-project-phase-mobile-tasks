@@ -80,7 +80,7 @@ class _AddProductPageState extends State<AddProductPage> {
     setState(() => _isLoading = true);
     try {
       final Product newProduct = Product(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: DateTime.now().millisecondsSinceEpoch,
         imagePath: _imageFile!.path,
         title: titleController.text.trim(),
         subtitle: subtitleController.text.trim(),

@@ -1,5 +1,5 @@
 class Product {
-  final String id;
+  final int id;
   final String imagePath;
   final String title;
   final String subtitle;
@@ -24,7 +24,7 @@ class Product {
 
 
   Product copyWith({
-    String? id,
+    int? id,
     String? imagePath,
     String? title,
     String? subtitle,
@@ -50,7 +50,7 @@ class Product {
 class ProductList {
   static List<Product> products = <Product>[
     Product(
-      id: '1',
+      id: 1,
       imagePath: 'images/shoe.jpg',
       title: 'Derby Leather Shoes',
       subtitle: 'Men\'s Shoes',
@@ -61,7 +61,7 @@ class ProductList {
     ),
 
      Product(
-      id: '2',
+      id: 2,
       imagePath: 'images/Nike.png',
       title: 'AirForce Shoes',
       subtitle: 'Men\'s Shoes',
@@ -73,7 +73,7 @@ class ProductList {
     ),
 
     Product(
-      id: '3',
+      id: 3,
       imagePath: 'images/shoe.jpg',
       title: 'Derby Leather Shoes',
       subtitle: 'Men\'s Shoes',

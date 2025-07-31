@@ -8,7 +8,7 @@ import 'product.dart';
 import 'product_manager.dart';
 
 class UpdatePage extends StatefulWidget {
-  final String id;
+  final int id;
   final String imagePath;
   final String title;
   final String subtitle;
@@ -132,7 +132,7 @@ class _UpdatePageState extends State<UpdatePage> {
                   context, 
                   listen: false
                 );
-                productManager.deleteProduct(widget.id);
+                productManager.deleteProduct(widget.id.toString());
                 if (mounted) Navigator.popUntil(context, ModalRoute.withName('/'));
               } catch (e) {
                 _showSnackBar('Error deleting product: $e');
