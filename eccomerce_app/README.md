@@ -154,7 +154,7 @@ test/
 # Run all tests
 flutter test
 
-# Run specific test file
+# Run specific test file ex. product_model_Test
 flutter test test/features/eccomerce_app/data/models/product_model_test.dart
 
 # Run tests with coverage
@@ -177,29 +177,15 @@ flutter test --coverage
 ## 📱 Features
 
 ### Current Features
-- ✅ Product listing and display
-- ✅ Product details view
-- ✅ Add new products
-- ✅ Update existing products
-- ✅ Delete products
-- ✅ Search functionality
-- ✅ Responsive UI design
+- ✅ Entities and Usecases
+- ✅ Product - Model
 - ✅ Clean Architecture implementation
 - ✅ Comprehensive testing
-
-### Planned Features
-- 🔄 User authentication
-- 🔄 Shopping cart functionality
-- 🔄 Payment integration
-- 🔄 Order management
-- 🔄 User reviews and ratings
-- 🔄 Image upload and management
 
 ## 🧪 Testing Strategy
 
 ### Test Types
 1. **Unit Tests**: Test individual components in isolation
-2. **Widget Tests**: Test UI components
 3. **Integration Tests**: Test complete user flows
 
 ### Testing Principles
@@ -245,16 +231,7 @@ test('should return a valid model when the JSON is valid', () async {
 ## 📈 Performance Considerations
 
 - Use `const` constructors where possible
-- Implement proper widget lifecycle management
-- Optimize image loading and caching
-- Minimize rebuilds with proper state management
 
-## 🔒 Security Considerations
-
-- Validate all user inputs
-- Implement proper error handling
-- Use secure storage for sensitive data
-- Follow OWASP mobile security guidelines
 
 ## 🤝 Contributing
 
@@ -266,16 +243,7 @@ test('should return a valid model when the JSON is valid', () async {
 6. Submit a pull request
 
 ## 📄 License
+- A2SV Project phase mobile track
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the repository
-- Check existing documentation
-- Review test examples
-
----
 
 **Built with ❤️ using Flutter and Clean Architecture**
