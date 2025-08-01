@@ -1,6 +1,6 @@
 # Ecommerce Flutter App
 
-A modern Flutter ecommerce application built with Clean Architecture principles, featuring product management, search functionality, and a responsive UI.
+A modern Flutter ecommerce application built with Clean Architecture principles, featuring product management
 
 ## 🏗️ Architecture Overview
 
