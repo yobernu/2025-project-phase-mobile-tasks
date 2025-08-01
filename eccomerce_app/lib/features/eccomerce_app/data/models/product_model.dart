@@ -21,4 +21,30 @@ class ProductModel extends Product {
     sizes: sizes ?? const <String>[],
     subtitle: subtitle ?? '',
   );
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    return ProductModel(
+      id: json['id'],
+      price: json['price'],
+      description: json['description'],
+      title: json['title'],
+      imagePath: json['imagePath'],
+      rating: json['rating'],
+      sizes: (json['sizes'] as List<dynamic>).cast<String>(),
+      subtitle: json['subtitle'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'price': price,
+      'description': description,
+      'title': title,
+      'imagePath': imagePath,
+      'rating': rating,
+      'sizes': sizes,
+      'subtitle': subtitle,
+    };
+  }
 }

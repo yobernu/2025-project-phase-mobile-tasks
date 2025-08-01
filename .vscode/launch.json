@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter: Run Tests",
+            "type": "dart",
+            "request": "launch",
+            "program": "eccomerce_app/test/",
+            "cwd": "eccomerce_app",
+            "console": "terminal"
+        },
+        {
+            "name": "eccomerce_app",
+            "cwd": "eccomerce_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "eccomerce_app (profile mode)",
+            "cwd": "eccomerce_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "eccomerce_app (release mode)",
+            "cwd": "eccomerce_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
