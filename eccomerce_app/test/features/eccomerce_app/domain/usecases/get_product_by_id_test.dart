@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:dartz/dartz.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
