@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {
   const Failure();
+  
 }
 
 // Common failure types for the ecommerce app

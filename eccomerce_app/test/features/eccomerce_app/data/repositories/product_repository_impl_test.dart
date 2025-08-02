@@ -5,10 +5,9 @@ import 'package:dartz/dartz.dart';
 
 import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_local_data_sources.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_remote_data_sources.dart';
-import 'package:ecommerce_app/core/platform/network_info.dart';
+import 'package:ecommerce_app/core/network/network_info.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/repositories/product_repository_impl.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
-import 'package:ecommerce_app/features/eccomerce_app/domain/repositories/product_repository.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/core/errors/exceptions.dart';
 
