@@ -17,7 +17,4 @@ abstract class ProductRepository {
   
   // Delete a product by ID
   Future<Either<Failure, void>> deleteProduct(int id);
-}
-
-
-// addProduct, deleteProduct, updateProduct, 
+} 
