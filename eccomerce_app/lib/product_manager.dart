@@ -24,7 +24,7 @@ class ProductManager with ChangeNotifier {
   }
 
   void deleteProduct(String id) {
-    _products.removeWhere((Product pro) => pro.id == id);
+    _products.removeWhere((Product pro) => pro.id.toString() == id);
     notifyListeners();
   }
 
