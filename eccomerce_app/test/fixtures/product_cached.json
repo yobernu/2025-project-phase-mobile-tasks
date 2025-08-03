@@ -1,0 +1,10 @@
+{
+    "id": 1,
+    "price": "100",
+    "description": "Product Description",
+    "title": "Product Title",
+    "imagePath": "https://via.placeholder.com/150",
+    "rating": "4.0",
+    "sizes": ["S", "M", "L"],
+    "subtitle": "Product Subtitle"
+}

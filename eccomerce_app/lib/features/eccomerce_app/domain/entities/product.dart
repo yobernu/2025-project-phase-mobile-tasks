@@ -22,6 +22,19 @@ class Product extends Equatable {
     required this.description,
   });
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'imagePath': imagePath,
+      'title': title,
+      'subtitle': subtitle,
+      'price': price,
+      'rating': rating,
+      'sizes': sizes,
+      'description': description,
+    };
+  }
+
   @override
   List<Object?> get props => [
     id,
