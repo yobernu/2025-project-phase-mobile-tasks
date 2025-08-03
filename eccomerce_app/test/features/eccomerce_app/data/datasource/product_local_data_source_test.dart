@@ -71,4 +71,107 @@ void main() {
       verify(mockSharedPreferences.setString('CACHED_PRODUCTS', expectedJsonString));
     });
   });
+
+   group('cacheProduct', () {
+    final tProductModel = ProductModel(
+      description: 'test description',
+      id: 1,
+      imagePath: 'test image path',
+      price: '100',
+      rating: '4.5',
+      subtitle: 'test subtitle',
+      title: 'test title',
+      sizes: ['S', 'M', 'L'],
+    );
+    final Product tProduct = tProductModel;
+    
+    test('should call the [SharedPreferences.setString] function with the correct values', () async {
+      // Arrange
+      final expectedJsonString = json.encode(tProduct.toJson());
+      when(mockSharedPreferences.setString('CACHED_PRODUCT', expectedJsonString)).thenAnswer((_) async => true);
+      
+      // Act
+      await dataSource.cacheProduct(tProduct);
+      
+      // Assert
+      verify(mockSharedPreferences.setString('CACHED_PRODUCT', expectedJsonString));
+    });
+  });
+
+
+   group('clearCache', () {
+    test('should remove all cached values when called', () async {
+      // Arrange
+      when(mockSharedPreferences.remove('CACHED_PRODUCTS')).thenAnswer((_) async => true);
+      when(mockSharedPreferences.remove('CACHED_PRODUCT')).thenAnswer((_) async => true);
+      
+      // Act
+      await dataSource.clearCache();
+      
+      // Assert
+      verify(mockSharedPreferences.remove('CACHED_PRODUCTS')).called(1);
+      verify(mockSharedPreferences.remove('CACHED_PRODUCT')).called(1);
+    });
+  });
+
+
+
+  group('deleteProduct', () {
+    test('should remove the cached product when called', () async {
+      // Arrange
+      when(mockSharedPreferences.remove('CACHED_PRODUCT_4')).thenAnswer((_) async => true);
+      
+      // Act
+      await dataSource.deleteProduct(4);
+      
+      // Assert
+      verify(mockSharedPreferences.remove('CACHED_PRODUCT_4')).called(1);
+    });
+  });
+
+
+  
+  group('getProductById', () {
+    test('should return the cached product when called', () async {
+      // Arrange
+      final tProduct = ProductModel.fromJson(json.decode(fixtures('product_cached.json')));
+      when(mockSharedPreferences.getString('CACHED_PRODUCT_4')).thenReturn(json.encode(tProduct.toJson()));
+      // Act
+      final result = await dataSource.getProductById(4);
+      
+      // Assert
+      verify(mockSharedPreferences.getString('CACHED_PRODUCT_4')).called(1);
+      expect(result, equals(tProduct));
+    });
+  });
+
+
+
+group('updateProduct', () {
+    test('should update the cached product by id when called (overwrite)', () async {
+      // Arrange
+      final tUpdatedProduct = ProductModel(
+        description: 'test description',
+        id: 4,
+        imagePath: 'test image path',
+        price: '100',
+        rating: '4.5',
+        subtitle: 'test subtitle',
+        title: 'test title',
+        sizes: ['S', 'M', 'L'],
+      );
+
+      final updatedJsonString = json.encode(tUpdatedProduct.toJson());
+      when(mockSharedPreferences.setString('CACHED_PRODUCT_4', updatedJsonString)).thenAnswer((_) async => true);
+
+     //act
+      await dataSource.updateProduct(tUpdatedProduct);
+      
+      // Assert
+      verify(mockSharedPreferences.setString('CACHED_PRODUCT_4', updatedJsonString)).called(1);
+      // expect(result, equals(tUpdatedProduct));
+    });
+  });
+
+
 }

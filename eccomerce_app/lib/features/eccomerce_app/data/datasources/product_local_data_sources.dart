@@ -32,6 +32,8 @@ abstract class ProductLocalDataSources {
 
  // ignore: non_constant_identifier_names
 final String CACHED_PRODUCTS = 'CACHED_PRODUCTS'; 
+// ignore: non_constant_identifier_names
+final String CACHED_PRODUCT = 'CACHED_PRODUCT';
 
 class ProductLocalDataSourcesImpl implements ProductLocalDataSources {
   final SharedPreferences sharedPreferences;
@@ -58,34 +60,39 @@ Future<void> cacheProducts(List<Product> products) async {
 
 
   @override
-  Future<void> cacheProduct(Product product) {
-    // TODO: implement cacheProduct
-    throw UnimplementedError();
+  Future<void> cacheProduct(Product product) async {
+    final jsonString = json.encode(product.toJson());
+    await sharedPreferences.setString(CACHED_PRODUCT, jsonString);
   }
 
   
 
   @override
-  Future<void> clearCache() {
-    // TODO: implement clearCache
-    throw UnimplementedError();
+  Future<void> clearCache() async {
+    await sharedPreferences.remove(CACHED_PRODUCTS);
+    await sharedPreferences.remove(CACHED_PRODUCT);
   }
 
   @override
-  Future<void> deleteProduct(int id) {
-    // TODO: implement deleteProduct
-    throw UnimplementedError();
-  }
+  Future<void> deleteProduct(int id) async{
+    await sharedPreferences.remove('CACHED_PRODUCT_$id');
+    }
+
 
   @override
   Future<Product> getProductById(int id) {
-    // TODO: implement getProductById
-    throw UnimplementedError();
+    final jsonString = sharedPreferences.getString('CACHED_PRODUCT_$id');
+    if (jsonString != null) {
+      final product = ProductModel.fromJson(json.decode(jsonString));
+      return Future.value(product);
+    } else {
+      throw CacheException();
+    }
   }
 
   @override
-  Future<void> updateProduct(Product product) {
-    // TODO: implement updateProduct
-    throw UnimplementedError();
+  Future<void> updateProduct(Product product) async {
+    final jsonString = json.encode(product.toJson());
+    await sharedPreferences.setString('CACHED_PRODUCT_${product.id}', jsonString);
   }
 }
