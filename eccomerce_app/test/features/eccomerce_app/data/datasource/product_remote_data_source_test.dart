@@ -9,6 +9,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
 import '../../../../fixtures/fixture_reader.dart';
+import '../../../../core/test_helpers.dart';
 import 'product_remote_data_source_test.mocks.dart';
 
 @GenerateMocks([http.Client])
@@ -21,9 +22,7 @@ void main() {
     dataSource = ProductRemoteDataSourcesImpl(client: mockHttpClient);
   });
 
-  final urlid = Uri.parse('https://fakestoreapi.com/products/1');
-  final headers = {'Content-Type': 'application/json'};
-
+  
   group('getAllProducts', () {
     test('should return all products when the response is successful', () async {
       // Arrange
@@ -31,25 +30,23 @@ void main() {
       final productsList = json.decode(productsJson) as List<dynamic>;
       final expectedProducts = productsList.map((json) => ProductModel.fromJson(json)).toList();
       
-      when(mockHttpClient.get(Uri.parse('https://fakestoreapi.com/products'), headers: anyNamed('headers')))
-          .thenAnswer((_) async => http.Response(productsJson, 200));
+      TestHelpers.mockSuccessfulGet(mockHttpClient, '/products', productsJson);
 
       // Act
       final result = await dataSource.getAllProducts();
 
       // Assert
-      verify(mockHttpClient.get(Uri.parse('https://fakestoreapi.com/products'), headers: anyNamed('headers'))).called(1);
+      TestHelpers.verifyGetCalled(mockHttpClient, '/products');
       expect(result, equals(expectedProducts));
     });
 
     test('should throw ServerException when the response is not successful', () async {
       // Arrange
-      when(mockHttpClient.get(Uri.parse('https://fakestoreapi.com/products'), headers: anyNamed('headers')))
-          .thenAnswer((_) async => http.Response('Error', 500));
+      TestHelpers.mockFailedRequest(mockHttpClient, '/products', 'GET');
 
       // Act & Assert
       expect(() => dataSource.getAllProducts(), throwsA(isA<ServerException>()));
-      verify(mockHttpClient.get(Uri.parse('https://fakestoreapi.com/products'), headers: anyNamed('headers'))).called(1);
+      TestHelpers.verifyGetCalled(mockHttpClient, '/products');
     });
   });
 
@@ -58,139 +55,99 @@ void main() {
       // Arrange
       final productJson = fixtures('product.json');
       final expectedProduct = ProductModel.fromJson(json.decode(productJson));
-      when(mockHttpClient.get(urlid, headers: anyNamed('headers')))
-          .thenAnswer((_) async => http.Response(productJson, 200));
+      TestHelpers.mockSuccessfulGet(mockHttpClient, '/products/1', productJson);
       
       // Act
       final result = await dataSource.getProductById(1);
 
       // Assert
-      verify(mockHttpClient.get(urlid, headers: anyNamed('headers'))).called(1);
+      TestHelpers.verifyGetCalled(mockHttpClient, '/products/1');
       expect(result, equals(expectedProduct));
     });
 
     test('should throw ServerException when the response is not successful', () async {
       // Arrange
-      when(mockHttpClient.get(urlid, headers: anyNamed('headers')))
-          .thenAnswer((_) async => http.Response('Error', 500));
+      TestHelpers.mockFailedRequest(mockHttpClient, '/products/1', 'GET');
       
       // Act & Assert
       expect(() => dataSource.getProductById(1), throwsA(isA<ServerException>()));
-      verify(mockHttpClient.get(urlid, headers: anyNamed('headers'))).called(1);
+      TestHelpers.verifyGetCalled(mockHttpClient, '/products/1');
     });
   });
 
   group('createProduct', () {
-    final product = ProductModel(
-      id: 1,
-      title: 'Test Product',
-      price: '100',
-      description: 'Test Description',
-      imagePath: 'https://via.placeholder.com/150',
-      rating: '4.5',
-      subtitle: 'Test Subtitle',
-      sizes: ['S', 'M', 'L'],
-    );
+    final product = TestHelpers.createTestProduct();
 
     test('should create a product when the response is successful', () async {
       // Arrange
       final productJson = fixtures('product.json');
       final expectedProduct = ProductModel.fromJson(json.decode(productJson));
-      when(mockHttpClient.post(
-        Uri.parse('https://fakestoreapi.com/products'), 
-        headers: anyNamed('headers'), 
-        body: anyNamed('body')
-      )).thenAnswer((_) async => http.Response(productJson, 201));
+      TestHelpers.mockSuccessfulPost(mockHttpClient, '/products', productJson);
       
       // Act
       final result = await dataSource.createProduct(product);
 
       // Assert
-      verify(mockHttpClient.post(
-        Uri.parse('https://fakestoreapi.com/products'), 
-        headers: anyNamed('headers'), 
-        body: anyNamed('body')
-      )).called(1);
+      TestHelpers.verifyPostCalled(mockHttpClient, '/products');
       expect(result, equals(expectedProduct));
     });
 
     test('should throw a ServerException when the response is not successful', () async {
       // Arrange
-      when(mockHttpClient.post(
-        Uri.parse('https://fakestoreapi.com/products'), 
-        headers: anyNamed('headers'), 
-        body: anyNamed('body')
-      )).thenAnswer((_) async => http.Response('Error', 500));
+      TestHelpers.mockFailedRequest(mockHttpClient, '/products', 'POST');
       
       // Act & Assert
       expect(() => dataSource.createProduct(product), throwsA(isA<ServerException>()));
-      verify(mockHttpClient.post(
-        Uri.parse('https://fakestoreapi.com/products'), 
-        headers: anyNamed('headers'), 
-        body: anyNamed('body')
-      )).called(1);
+      TestHelpers.verifyPostCalled(mockHttpClient, '/products');
     });
   });
 
   group('deleteProduct', () {
     test('should delete a product when the response is successful', () async {
       // Arrange
-      when(mockHttpClient.delete(urlid, headers: headers))
-          .thenAnswer((_) async => http.Response('', 200));
+      TestHelpers.mockSuccessfulDelete(mockHttpClient, '/products/1');
       
       // Act
       await dataSource.deleteProduct(1);
 
       // Assert
-      verify(mockHttpClient.delete(urlid, headers: headers)).called(1);
+      TestHelpers.verifyDeleteCalled(mockHttpClient, '/products/1');
     });
 
     test('should throw a ServerException when the response is not successful', () async {
       // Arrange
-      when(mockHttpClient.delete(urlid, headers: headers))
-          .thenAnswer((_) async => http.Response('Error', 500));
+      TestHelpers.mockFailedRequest(mockHttpClient, '/products/1', 'DELETE');
       
       // Act & Assert
       expect(() => dataSource.deleteProduct(1), throwsA(isA<ServerException>()));
-      verify(mockHttpClient.delete(urlid, headers: headers)).called(1);
+      TestHelpers.verifyDeleteCalled(mockHttpClient, '/products/1');
     });
   });
 
   group('updateProduct', () {
-    final product = ProductModel(
-      id: 1,
-      title: 'Test Product',
-      price: '100',
-      description: 'Test Description',
-      imagePath: 'https://via.placeholder.com/150',
-      rating: '4.5',
-      subtitle: 'Test Subtitle',
-      sizes: ['S', 'M', 'L'],
-    );
+    final product = TestHelpers.createTestProduct();
 
     test('should update a product when the response is successful', () async {
       // Arrange
       final productJson = fixtures('product.json');
       final expectedProduct = ProductModel.fromJson(json.decode(productJson));
-      when(mockHttpClient.put(urlid, headers: headers, body: anyNamed('body')))
-          .thenAnswer((_) async => http.Response(productJson, 200));
+      TestHelpers.mockSuccessfulPut(mockHttpClient, '/products/1', productJson);
       
       // Act
       final result = await dataSource.updateProduct(product);
 
       // Assert
-      verify(mockHttpClient.put(urlid, headers: headers, body: anyNamed('body'))).called(1);
+      TestHelpers.verifyPutCalled(mockHttpClient, '/products/1');
       expect(result, equals(expectedProduct));
     });
 
     test('should throw a ServerException when the response is not successful', () async {
       // Arrange
-      when(mockHttpClient.put(urlid, headers: headers, body: anyNamed('body')))
-          .thenAnswer((_) async => http.Response('Error', 500));
+      TestHelpers.mockFailedRequest(mockHttpClient, '/products/1', 'PUT');
       
       // Act & Assert
       expect(() => dataSource.updateProduct(product), throwsA(isA<ServerException>()));
-      verify(mockHttpClient.put(urlid, headers: headers, body: anyNamed('body'))).called(1);
+      TestHelpers.verifyPutCalled(mockHttpClient, '/products/1');
     });
   });
 }
