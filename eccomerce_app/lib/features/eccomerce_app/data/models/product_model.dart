@@ -34,17 +34,4 @@ class ProductModel extends Product {
       subtitle: json['subtitle'],
     );
   }
-    @override
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'price': price,
-      'description': description,
-      'title': title,
-      'imagePath': imagePath,
-      'rating': rating,
-      'sizes': sizes,
-      'subtitle': subtitle,
-    };
-  }
 }
