@@ -94,12 +94,12 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ServerFailure _:
+    switch (failure) {
+      case ServerFailure():
         return 'Server Failure';
-      case CacheFailure _:
+      case CacheFailure():
         return 'Cache Failure';
-      case InvalidInputFailure _:
+      case InvalidInputFailure():
         return 'Invalid Input';
       default:
         return 'Unexpected Error';
