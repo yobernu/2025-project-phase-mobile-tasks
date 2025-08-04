@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dartz/dartz.dart';
-import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
+import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
+import 'package:ecommerce_app/features/eccomerce_app/data/models/product_model.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/update_product.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/repositories/product_repository.dart';
 
@@ -17,12 +18,12 @@ class MockProductRepository implements ProductRepository {
   Product? get lastUpdatedProduct => _lastUpdatedProduct;
 
   @override
-  Future<Either<Failure, List<Product>>> getAllProducts() async {
+  Future<Either<Failure, List<ProductModel>>> getAllProducts() async {
     return const Right([]);
   }
 
   @override
-  Future<Either<Failure, Product>> getProductById(int id) async {
+  Future<Either<Failure, ProductModel>> getProductById(int id) async {
     return Left(ProductNotFoundFailure(id));
   }
 

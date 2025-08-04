@@ -5,11 +5,13 @@ import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_lo
 import 'package:ecommerce_app/features/eccomerce_app/data/models/product_model.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mockito/mockito.dart';
 import '../../../../fixtures/fixture_reader.dart';
 import 'product_local_data_source_test.mocks.dart';
 
+@GenerateMocks([SharedPreferences])
 void main() {
   late ProductLocalDataSourcesImpl dataSource;
   late MockSharedPreferences mockSharedPreferences;

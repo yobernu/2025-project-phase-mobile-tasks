@@ -1,34 +1,35 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dartz/dartz.dart';
-import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
+import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
+import 'package:ecommerce_app/features/eccomerce_app/data/models/product_model.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/insert_product.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/repositories/product_repository.dart';
 
 // Simple mock implementation for testing
 class MockProductRepository implements ProductRepository {
   bool _shouldSucceed = true;
-  Product? _lastInsertedProduct;
+  Product? _lastCreatedProduct;
 
   void setShouldSucceed(bool shouldSucceed) {
     _shouldSucceed = shouldSucceed;
   }
 
-  Product? get lastInsertedProduct => _lastInsertedProduct;
+  Product? get lastCreatedProduct => _lastCreatedProduct;
 
   @override
-  Future<Either<Failure, List<Product>>> getAllProducts() async {
+  Future<Either<Failure, List<ProductModel>>> getAllProducts() async {
     return const Right([]);
   }
 
   @override
-  Future<Either<Failure, Product>> getProductById(int id) async {
+  Future<Either<Failure, ProductModel>> getProductById(int id) async {
     return Left(ProductNotFoundFailure(id));
   }
 
   @override
   Future<Either<Failure, void>> createProduct(Product product) async {
-    _lastInsertedProduct = product;
+    _lastCreatedProduct = product;
     return _shouldSucceed 
         ? const Right(null)
         : Left(ServerFailure('Failed to create product'));
@@ -74,7 +75,7 @@ void main() {
 
     // assert
     expect(result, const Right(null));
-    expect(mockProductRepository.lastInsertedProduct, testProduct);
+    expect(mockProductRepository.lastCreatedProduct, testProduct);
   });
 
   test('should return failure when product insertion fails', () async {
@@ -86,6 +87,6 @@ void main() {
 
     // assert
     expect(result, Left(ServerFailure('Failed to create product')));
-    expect(mockProductRepository.lastInsertedProduct, testProduct);
+    expect(mockProductRepository.lastCreatedProduct, testProduct);
   });
 } 

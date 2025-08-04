@@ -6,6 +6,7 @@ import '../../data/datasources/product_local_data_sources.dart';
 import '../../data/datasources/product_remote_data_sources.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/repositories/product_repository.dart';
+import '../../data/models/product_model.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSources remoteDataSource;
@@ -19,20 +20,33 @@ class ProductRepositoryImpl implements ProductRepository {
   });
 
   @override
-  Future<Either<Failure, List<Product>>> getAllProducts() async {
+  Future<Either<Failure, List<ProductModel>>> getAllProducts() async {
     try {
       final isConnected = await networkInfo.isConnected;
       
       if (isConnected) {
         // Try to get from remote source
-        final remoteProducts = await remoteDataSource.getAllProducts();
+        final remoteProductModels = await remoteDataSource.getAllProducts();
+        // Convert ProductModel to Product for local caching
+        final remoteProducts = remoteProductModels.map((model) => model as Product).toList();
         // Cache the products locally
         await localDataSource.cacheProducts(remoteProducts);
-        return Right(remoteProducts);
+        return Right(remoteProductModels);
       } else {
         // Get from local cache when offline
         final localProducts = await localDataSource.getAllProducts();
-        return Right(localProducts);
+        // Convert Product to ProductModel for return
+        final localProductModels = localProducts.map((product) => ProductModel(
+          id: product.id,
+          price: product.price,
+          description: product.description,
+          title: product.title,
+          imagePath: product.imagePath,
+          rating: product.rating,
+          sizes: product.sizes,
+          subtitle: product.subtitle,
+        )).toList();
+        return Right(localProductModels);
       }
     } on ServerException {
       return Left(ServerFailure());
@@ -44,20 +58,33 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Either<Failure, Product>> getProductById(int id) async {
+  Future<Either<Failure, ProductModel>> getProductById(int id) async {
     try {
       final isConnected = await networkInfo.isConnected;
       
       if (isConnected) {
         // Try to get from remote source
-        final remoteProduct = await remoteDataSource.getProductById(id);
+        final remoteProductModel = await remoteDataSource.getProductById(id);
+        // Convert ProductModel to Product for local caching
+        final remoteProduct = remoteProductModel as Product;
         // Cache the product locally
         await localDataSource.cacheProduct(remoteProduct);
-        return Right(remoteProduct);
+        return Right(remoteProductModel);
       } else {
         // Get from local cache when offline
         final localProduct = await localDataSource.getProductById(id);
-        return Right(localProduct);
+        // Convert Product to ProductModel for return
+        final localProductModel = ProductModel(
+          id: localProduct.id,
+          price: localProduct.price,
+          description: localProduct.description,
+          title: localProduct.title,
+          imagePath: localProduct.imagePath,
+          rating: localProduct.rating,
+          sizes: localProduct.sizes,
+          subtitle: localProduct.subtitle,
+        );
+        return Right(localProductModel);
       }
     } on ServerException {
       return Left(ProductNotFoundFailure(id));

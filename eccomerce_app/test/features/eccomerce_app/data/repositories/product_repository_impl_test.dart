@@ -8,6 +8,7 @@ import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_re
 import 'package:ecommerce_app/core/network/network_info.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/repositories/product_repository_impl.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
+import 'package:ecommerce_app/features/eccomerce_app/data/models/product_model.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/core/errors/exceptions.dart';
 
@@ -32,7 +33,19 @@ void main() {
     subtitle: 'Test Subtitle',
   );
 
+  final tProductModel = ProductModel(
+    id: 1,
+    price: '100',
+    description: 'Test Description',
+    title: 'Test Product',
+    imagePath: 'https://test.com/image.jpg',
+    rating: '4.5',
+    sizes: ['S', 'M', 'L'],
+    subtitle: 'Test Subtitle',
+  );
+
   final tProducts = [tProduct];
+  final tProductModels = [tProductModel];
 
   setUp(() {
     mockRemoteDataSource = MockProductRemoteDataSources();
@@ -45,19 +58,16 @@ void main() {
     );
   });
 
-
-
-
-// getallproducts
+  // getallproducts
   group('getAllProducts - Online/Offline Scenarios', () {
     test('should fetch from remote and cache when online', () async {
       // Arrange
       when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
       when(
         mockRemoteDataSource.getAllProducts(),
-      ).thenAnswer((_) async => tProducts);
+      ).thenAnswer((_) async => tProductModels);
       when(
-        mockLocalDataSource.cacheProducts(tProducts),
+        mockLocalDataSource.cacheProducts(tProductModels),
       ).thenAnswer((_) async {});
 
       // Act
@@ -66,8 +76,8 @@ void main() {
       // Assert
       verify(mockNetworkInfo.isConnected);
       verify(mockRemoteDataSource.getAllProducts());
-      verify(mockLocalDataSource.cacheProducts(tProducts));
-      expect(result, Right(tProducts));
+      verify(mockLocalDataSource.cacheProducts(tProductModels));
+      expect(result, Right(tProductModels));
     });
 
     test('should fetch from local when offline', () async {
@@ -84,7 +94,12 @@ void main() {
       verify(mockNetworkInfo.isConnected);
       verify(mockLocalDataSource.getAllProducts());
       verifyNever(mockRemoteDataSource.getAllProducts());
-      expect(result, Right(tProducts));
+      // The repository converts Product to ProductModel, so we expect the converted result
+      expect(result.isRight(), true);
+      final products = (result as Right).value;
+      expect(products.length, equals(1));
+      expect(products[0].id, equals(tProduct.id));
+      expect(products[0].title, equals(tProduct.title));
     });
 
     test('should return ServerFailure when remote fails', () async {
@@ -159,9 +174,9 @@ void main() {
         when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
         when(
           mockRemoteDataSource.getProductById(tProduct.id),
-        ).thenAnswer((_) async => tProduct);
+        ).thenAnswer((_) async => tProductModel);
         when(
-          mockLocalDataSource.cacheProduct(tProduct),
+          mockLocalDataSource.cacheProduct(tProductModel),
         ).thenAnswer((_) async {});
 
         // Act
@@ -170,8 +185,8 @@ void main() {
         // Assert
         verify(mockNetworkInfo.isConnected);
         verify(mockRemoteDataSource.getProductById(tProduct.id));
-        verify(mockLocalDataSource.cacheProduct(tProduct));
-        expect(result, Right(tProduct));
+        verify(mockLocalDataSource.cacheProduct(tProductModel));
+        expect(result, Right(tProductModel));
       },
     );
 
@@ -189,7 +204,7 @@ void main() {
       verify(mockNetworkInfo.isConnected);
       verify(mockLocalDataSource.getProductById(tProduct.id));
       verifyNever(mockRemoteDataSource.getProductById(tProduct.id));
-      expect(result, Right(tProduct));
+      expect(result, Right(tProductModel));
     });
 
     test(
@@ -297,7 +312,7 @@ void main() {
       when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
       when(
         mockRemoteDataSource.createProduct(tProduct),
-      ).thenAnswer((_) async => tProduct);
+      ).thenAnswer((_) async => tProductModel);
       when(mockLocalDataSource.cacheProduct(tProduct)).thenAnswer((_) async {});
       // act
       final result = await repository.createProduct(tProduct);
@@ -379,7 +394,7 @@ void main() {
       when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
       when(
         mockRemoteDataSource.updateProduct(tProduct),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => tProductModel);
       when(mockLocalDataSource.updateProduct(tProduct)).thenAnswer((_) async {});
       // act
       final result = await repository.updateProduct(tProduct);

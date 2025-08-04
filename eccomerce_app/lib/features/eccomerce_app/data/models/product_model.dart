@@ -34,7 +34,7 @@ class ProductModel extends Product {
       subtitle: json['subtitle'],
     );
   }
-
+    @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
