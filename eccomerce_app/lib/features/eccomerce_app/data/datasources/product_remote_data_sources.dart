@@ -1,9 +1,10 @@
 import 'dart:convert';
-
+import 'dart:developer' as dev;
 import 'package:ecommerce_app/core/errors/exceptions.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/models/product_model.dart';
 import '../../domain/entities/product.dart';
 import 'package:http/http.dart' as http;
+import '../../../../core/constants/api_constants.dart';
 
 
 abstract class ProductRemoteDataSources {
@@ -28,24 +29,36 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
   ProductRemoteDataSourcesImpl({required this.client});
 
 
- @override
+   @override
   Future<List<ProductModel>> getAllProducts() async {
-    final response = await client.get(Uri.parse('https://g5-flutter-learning-path-be.onrender.com/api/v1/products'), headers: {
-      'Content-Type': 'application/json',
-    });
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse = json.decode(response.body);
-      return jsonResponse.map((json) => ProductModel.fromJson(json)).toList();
-    } else {
+    try {
+      final response = await client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}'), 
+        headers: ApiConstants.headers,
+      );
+      
+      dev.log('API Response Status: ${response.statusCode}');
+      dev.log('API Response Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = json.decode(response.body);
+        return jsonResponse.map((json) => ProductModel.fromJson(json)).toList();
+      } else {
+        dev.log('Server error: ${response.statusCode} - ${response.body}');
+        throw ServerException();
+      }
+    } catch (e) {
+      dev.log('Exception in getAllProducts: $e');
       throw ServerException();
     }
   }
 
     @override
   Future<ProductModel> getProductById(int id) async{
-    final response = await client.get(Uri.parse('https://g5-flutter-learning-path-be.onrender.com/api/v1/products/$id'), headers: {
-      'Content-Type': 'application/json' ,
-    });
+    final response = await client.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}/$id'), 
+      headers: ApiConstants.headers,
+    );
 
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -58,8 +71,8 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
   @override
   Future<ProductModel> createProduct(Product product) async{
      final response = await client.post(
-    Uri.parse('https://g5-flutter-learning-path-be.onrender.com/api/v1/products'),
-    headers: {'Content-Type': 'application/json'},
+    Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}'),
+    headers: ApiConstants.headers,
     body: json.encode(product.toJson()),
   );
 
@@ -74,9 +87,10 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
 
   @override
   Future<void> deleteProduct(int id) async{
-    final response = await client.delete(Uri.parse('https://g5-flutter-learning-path-be.onrender.com/api/v1/products/$id'), headers: {
-      'Content-Type': 'application/json',
-    });
+    final response = await client.delete(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}/$id'), 
+      headers: ApiConstants.headers,
+    );
     if (response.statusCode == 200) {
       return;
     } else {
@@ -88,8 +102,8 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
   @override
   Future<ProductModel> updateProduct(Product product) async{
     final response = await client.put(
-      Uri.parse('https://g5-flutter-learning-path-be.onrender.com/api/v1/products/${product.id}'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}/${product.id}'),
+      headers: ApiConstants.headers,
       body: json.encode(product.toJson()),
     );
     if (response.statusCode == 200) {

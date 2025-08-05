@@ -23,15 +23,32 @@ class ProductModel extends Product {
   );
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    // Handle Fake Store API structure
+    final rating = json['rating'];
+    final ratingValue = rating is Map ? rating['rate']?.toString() ?? '4.0' : rating?.toString() ?? '4.0';
+    
     return ProductModel(
       id: json['id'],
-      price: json['price'],
-      description: json['description'],
-      title: json['title'],
-      imagePath: json['imagePath'],
-      rating: json['rating'],
-      sizes: (json['sizes'] as List<dynamic>).cast<String>(),
-      subtitle: json['subtitle'],
+      price: json['price']?.toString() ?? '',
+      description: json['description'] ?? '',
+      title: json['title'] ?? '',
+      imagePath: json['image'] ?? json['imagePath'] ?? '', // Handle both 'image' and 'imagePath'
+      rating: ratingValue,
+      sizes: json['sizes'] != null ? (json['sizes'] as List<dynamic>).cast<String>() : const <String>[],
+      subtitle: json['subtitle'] ?? json['category'] ?? '', // Use category as subtitle if available
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'price': price,
+      'description': description,
+      'title': title,
+      'imagePath': imagePath,
+      'rating': rating,
+      'sizes': sizes,
+      'subtitle': subtitle,
+    };
   }
 }

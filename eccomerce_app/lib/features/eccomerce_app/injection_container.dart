@@ -1,5 +1,8 @@
 import 'package:ecommerce_app/core/network/network_info.dart';
+import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_local_data_sources.dart';
+import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_remote_data_sources.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/repositories/product_repository_impl.dart';
+import 'package:ecommerce_app/features/eccomerce_app/domain/repositories/product_repository.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/get_all_products.dart';
@@ -7,7 +10,6 @@ import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/update_prod
 import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/delete_product.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/insert_product.dart';
 import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/get_product_by_id.dart';
-import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_remote_data_sources.dart';
 import 'package:ecommerce_app/core/utils/input_converter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -36,17 +38,17 @@ Future<void> init() async {
   ls.registerLazySingleton(() => UpdateProduct(ls()));
   ls.registerLazySingleton(() => DeleteProduct(ls()));
   ls.registerLazySingleton(() => InsertProduct(ls()));
-  ls.registerLazySingleton(() => InputConverter());
 
   // Repositories
-  ls.registerLazySingleton(() => ProductRepositoryImpl(
+  ls.registerLazySingleton<ProductRepository>(() => ProductRepositoryImpl(
     remoteDataSource: ls(),
     localDataSource: ls(),
     networkInfo: ls(),
   ));
 
   // Data sources
-  ls.registerLazySingleton(() => ProductRemoteDataSourcesImpl(client: ls()));
+  ls.registerLazySingleton<ProductRemoteDataSources>(() => ProductRemoteDataSourcesImpl(client: ls()));
+  ls.registerLazySingleton<ProductLocalDataSources>(() => ProductLocalDataSourcesImpl(sharedPreferences: ls()));
 
   // Core
   ls.registerLazySingleton(() => InputConverter());
