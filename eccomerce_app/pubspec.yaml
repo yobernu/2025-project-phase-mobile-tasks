@@ -48,7 +48,7 @@ dependencies:
   dartz: ^0.10.1
   
   # Network and connectivity
-  connectivity: ^3.0.6
+  connectivity_plus: ^6.1.4
   http: ^1.2.0
   internet_connection_checker: ^3.0.1
   
