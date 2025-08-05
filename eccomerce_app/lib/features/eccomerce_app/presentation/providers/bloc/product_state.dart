@@ -47,3 +47,4 @@ class ErrorState extends ProductState {
   @override
   List<Object?> get props => [message];
 }
+

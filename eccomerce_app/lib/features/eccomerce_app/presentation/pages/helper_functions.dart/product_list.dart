@@ -129,131 +129,131 @@ class ProductList extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // Navigate to product details page
-        Navigator.pushNamed(context, '/product-details', arguments: product);
+        Navigator.pushNamed(
+              context,
+              '/product-details',
+              arguments: product,
+            );
       },
-
-      // product card
       child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // product image
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
-                  ),
-                  color: Colors.grey[200],
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // product image
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
                 ),
-                child: product.imagePath.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
-                        ),
-                        child: product.imagePath.startsWith('http')
-                            ? Image.network(
-                                product.imagePath,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value:
-                                              loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    loadingProgress
-                                                        .expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      );
-                                    },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(
-                                    Icons.image,
-                                    size: 50,
-                                    color: Colors.grey,
-                                  );
-                                },
-                              )
-                            : Image.asset(
-                                product.imagePath,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              ),
-                      )
-                    : const Icon(Icons.image, size: 50, color: Colors.grey),
+                color: Colors.grey[200],
               ),
-              //padding below image
-              const SizedBox(height: 20),
-
-              SizedBox(
-                height: 80,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              child: product.imagePath.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        product.subtitle,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '\$${product.price}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                              fontSize: 12,
+                      child: product.imagePath.startsWith('http')
+                          ? Image.network(
+                              product.imagePath,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value:
+                                            loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(
+                                  Icons.image,
+                                  size: 50,
+                                  color: Colors.grey,
+                                );
+                              },
+                            )
+                          : Image.asset(
+                              product.imagePath,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
                             ),
-                          ),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                size: 12,
-                                color: Colors.amber,
-                              ),
-                              Text(
-                                product.rating,
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                            ],
-                          ),
-                        ],
+                    )
+                  : const Icon(Icons.image, size: 50, color: Colors.grey),
+            ),
+            //padding below image
+            const SizedBox(height: 20),
+
+            SizedBox(
+              height: 80,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
-                    ],
-                  ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      product.subtitle,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '\$${product.price}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              size: 12,
+                              color: Colors.amber,
+                            ),
+                            Text(
+                              product.rating,
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
       ),
     );
   }

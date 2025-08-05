@@ -59,6 +59,9 @@ class CreateProductEvent extends ProductEvent {
 
 
 
+
+
+
 // LoadAllProductsEvent (1 point): 
 // GetSingleProductEvent (1 point)
 // UpdateProductEvent (1 point)

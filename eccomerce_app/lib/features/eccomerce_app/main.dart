@@ -1,18 +1,13 @@
-import 'injection_container.dart' as di;
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'presentation/pages/screens/home_screen.dart';
-import 'presentation/providers/bloc/product_bloc.dart';
+import 'injection_container.dart' as di;
+import 'presentation/pages/Navigation/navigation.dart';
 
-
-
-
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await di.init();
-  runApp(MyApp());
+  await di.init(); // Your DI setup
+  runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -24,12 +19,8 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blue,
         fontFamily: 'Poppins',
       ),
-      home: BlocProvider(
-        create: (context) => GetIt.instance<ProductBloc>(),
-        child: const HomeScreen(),
-      ),
+      initialRoute: '/',
+      onGenerateRoute: Navigation.generateRoute,
     );
   }
 }
-
-
