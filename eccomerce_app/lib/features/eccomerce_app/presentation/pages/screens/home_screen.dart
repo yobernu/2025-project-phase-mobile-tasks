@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_bloc.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_event.dart';
-import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/product_list.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/helper_functions.dart/product_list.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

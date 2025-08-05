@@ -13,17 +13,13 @@ class ProductList extends StatelessWidget {
     return BlocBuilder<ProductBloc, ProductState>(
       builder: (context, state) {
         if (state is LoadingState) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         } else if (state is LoadedAllProductsState) {
           return _buildProductsList(state.products, context);
         } else if (state is ErrorState) {
           return _buildError(state.message, context);
         } else {
-          return const Center(
-            child: Text('No products available'),
-          );
+          return const Center(child: Text('No products available'));
         }
       },
     );
@@ -31,9 +27,7 @@ class ProductList extends StatelessWidget {
 
   Widget _buildProductsList(List<Product> products, BuildContext context) {
     if (products.isEmpty) {
-      return const Center(
-        child: Text('No products available'),
-      );
+      return const Center(child: Text('No products available'));
     }
 
     return SingleChildScrollView(
@@ -79,10 +73,10 @@ class ProductList extends StatelessWidget {
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
+              crossAxisCount: 1,
+              childAspectRatio: 1.1,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
             ),
@@ -92,7 +86,7 @@ class ProductList extends StatelessWidget {
             },
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: TextButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/add-product');
@@ -130,27 +124,27 @@ class ProductList extends StatelessWidget {
     );
   }
 
+  // product card
   Widget _buildProductCard(Product product, BuildContext context) {
     return GestureDetector(
       onTap: () {
         // Navigate to product details page
-        Navigator.pushNamed(
-          context,
-          '/product-details',
-          arguments: product,
-        );
+        Navigator.pushNamed(context, '/product-details', arguments: product);
       },
+
+      // product card
       child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: Container(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // product image
+              Container(
+                height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.vertical(
@@ -168,18 +162,23 @@ class ProductList extends StatelessWidget {
                                 product.imagePath,
                                 fit: BoxFit.cover,
                                 width: double.infinity,
-                                height: double.infinity,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value: loadingProgress.expectedTotalBytes != null
-                                          ? loadingProgress.cumulativeBytesLoaded /
-                                              loadingProgress.expectedTotalBytes!
-                                          : null,
-                                    ),
-                                  );
-                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value:
+                                              loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      );
+                                    },
                                 errorBuilder: (context, error, stackTrace) {
                                   return const Icon(
                                     Icons.image,
@@ -192,75 +191,69 @@ class ProductList extends StatelessWidget {
                                 product.imagePath,
                                 fit: BoxFit.cover,
                                 width: double.infinity,
-                                height: double.infinity,
                               ),
                       )
-                    : const Icon(
-                        Icons.image,
-                        size: 50,
-                        color: Colors.grey,
-                      ),
+                    : const Icon(Icons.image, size: 50, color: Colors.grey),
               ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+              //padding below image
+              const SizedBox(height: 20),
+
+              SizedBox(
+                height: 80,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      product.subtitle,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
+                      const SizedBox(height: 4),
+                      Text(
+                        product.subtitle,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '\$${product.price}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                            fontSize: 12,
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '\$${product.price}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              size: 12,
-                              color: Colors.amber,
-                            ),
-                            Text(
-                              product.rating,
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                size: 12,
+                                color: Colors.amber,
+                              ),
+                              Text(
+                                product.rating,
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
       ),
     );
   }
@@ -270,11 +263,7 @@ class ProductList extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red,
-          ),
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
             'Error: $errorMessage',
@@ -292,5 +281,4 @@ class ProductList extends StatelessWidget {
       ),
     );
   }
-} 
-
+}
