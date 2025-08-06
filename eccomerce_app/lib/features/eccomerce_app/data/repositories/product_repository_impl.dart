@@ -120,30 +120,32 @@ class ProductRepositoryImpl implements ProductRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, void>> updateProduct(Product product) async {
-    try {
-      final isConnected = await networkInfo.isConnected;
-      
-      if (isConnected) {
-        // Update in remote source
-        await remoteDataSource.updateProduct(product);
-        // Update local cache
-        await localDataSource.updateProduct(product);
-        return const Right(null);
-      } else {
-        // Update local cache when offline
-        await localDataSource.updateProduct(product);
-        return const Right(null);
-      }
-    } on ServerException {
-      return Left(ServerFailure());
-    } on CacheException {
-      return Left(ServerFailure());
-    } on ProductNotFoundException {
-      return Left(ServerFailure());
+ @override
+Future<Either<Failure, ProductModel>> updateProduct(Product product) async {
+  try {
+    final isConnected = await networkInfo.isConnected;
+    
+    if (isConnected) {
+      // Update in remote source
+      final remoteProduct = await remoteDataSource.updateProduct(product);
+      // Update local cache with the remote version
+      await localDataSource.cacheProduct(remoteProduct);
+      return Right(remoteProduct);
+    } else {
+      // Update local cache when offline
+      final localProduct = await localDataSource.updateProduct(product) as ProductModel;
+      return Right(localProduct);
     }
+  } on ServerException catch (_) {
+    return Left(ServerFailure());
+  } on CacheException catch (_) {
+    return Left(CacheFailure());
+  } on ProductNotFoundException catch (_) {
+    return Left(ProductNotFoundFailure(0));
+  } catch (_) {
+    return Left(ServerFailure());
   }
+}
 
   @override
   Future<Either<Failure, void>> deleteProduct(int id) async {

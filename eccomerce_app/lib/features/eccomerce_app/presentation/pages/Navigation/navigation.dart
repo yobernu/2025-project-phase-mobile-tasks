@@ -1,5 +1,7 @@
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/create_screen.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/details_screen.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/home_screen.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/updates_screen.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_bloc.dart';
 
 
@@ -28,6 +30,20 @@ class Navigation {
             child: DetailsScreen(product: product),
           ),
         );
+      case '/product-updates':
+        final product = settings.arguments as Product;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => injector<ProductBloc>(),
+            child: UpdatesScreen(product: product),
+          ),
+        );
+      case '/create-product':
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => injector<ProductBloc>(),
+            child: CreateScreen(),
+            ));
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

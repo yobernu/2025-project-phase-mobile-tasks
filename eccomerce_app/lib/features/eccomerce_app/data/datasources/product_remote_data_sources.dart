@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer' as dev;
+import 'package:dartz/dartz.dart';
 import 'package:ecommerce_app/core/errors/exceptions.dart';
+import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/models/product_model.dart';
 import '../../domain/entities/product.dart';
 import 'package:http/http.dart' as http;
@@ -53,6 +55,8 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
     }
   }
 
+
+
     @override
   Future<ProductModel> getProductById(int id) async{
     final response = await client.get(
@@ -86,18 +90,23 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
   }
 
   @override
-  Future<void> deleteProduct(int id) async{
-    final response = await client.delete(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}/$id'), 
-      headers: ApiConstants.headers,
-    );
-    if (response.statusCode == 200) {
-      return;
-    } else {
-      throw ServerException();
+  Future<Either<Failure, void>> deleteProduct(int id) async {
+    try {
+      final response = await client.delete(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}/$id'),
+        headers: ApiConstants.headers,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return const Right(null);
+      } else {
+        return Left(ServerFailure('Failed to delete product'));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Could not connect to server'));
     }
-  
   }
+
 
   @override
   Future<ProductModel> updateProduct(Product product) async{

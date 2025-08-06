@@ -47,8 +47,8 @@ class MockProductRepository implements ProductRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateProduct(Product product) async {
-    return const Right(null);
+  Future<Either<Failure, ProductModel>> updateProduct(Product product) async {
+    return const Right(ProductModel(id: 0, title: '', subtitle: '', price: '', rating: '', sizes: [], description: ''));
   }
 
   @override

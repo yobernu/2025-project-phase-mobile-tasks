@@ -48,3 +48,12 @@ class ErrorState extends ProductState {
   List<Object?> get props => [message];
 }
 
+
+class ProductUpdatedState extends ProductState {
+  final Product product;
+  
+  const ProductUpdatedState(this.product);
+  
+  @override
+  List<Object?> get props => [product];
+}

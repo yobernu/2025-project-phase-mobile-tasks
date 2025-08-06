@@ -89,7 +89,7 @@ class ProductList extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             child: TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/add-product');
+                Navigator.pushNamed(context, '/create-product');
               },
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(

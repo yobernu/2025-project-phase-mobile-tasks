@@ -14,7 +14,7 @@ abstract class ProductRepository {
   Future<Either<Failure, void>> createProduct(Product product);
   
   // Update an existing product
-  Future<Either<Failure, void>> updateProduct(Product product);
+  Future<Either<Failure, ProductModel>> updateProduct(Product product);
   
   // Delete a product by ID
   Future<Either<Failure, void>> deleteProduct(int id);
