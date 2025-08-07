@@ -1,0 +1,1 @@
+// A splash screen that displays upon app launch.
