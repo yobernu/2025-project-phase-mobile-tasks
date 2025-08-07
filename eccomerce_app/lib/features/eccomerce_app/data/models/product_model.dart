@@ -39,6 +39,8 @@ class ProductModel extends Product {
     );
   }
 
+  
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
