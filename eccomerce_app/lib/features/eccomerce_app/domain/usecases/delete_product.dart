@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases.dart/usecases.dart';
+import '../../../../core/usecases/usecases.dart';
 import '../repositories/product_repository.dart';
 
 class DeleteProductParams extends Params {

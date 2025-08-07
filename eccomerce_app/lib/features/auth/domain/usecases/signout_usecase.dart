@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
-import 'package:ecommerce_app/core/usecases.dart/usecases.dart';
+import 'package:ecommerce_app/core/usecases/usecases.dart';
 import 'package:ecommerce_app/features/auth/domain/repositories/auth_repositories.dart';
 
 class SignOutParams extends Params {

@@ -20,19 +20,34 @@ Future<Either<Failure, User>> signUp({
   required String email,
   required String password,
 }) async {
+  print('Starting signUp process...'); // Debug log
   final isConnected = await networkInfo.isConnected;
+  print('Network connection check: $isConnected'); // Debug log
+
+  // Test the connection checker directly
+  try {
+    final testConnection = await networkInfo.isConnected;
+    print('Direct network test: $testConnection');
+  } catch (e) {
+    print('Network test error: $e');
+  }
 
   if (!isConnected) {
+    print('No internet connection detected'); // Debug log
     return Left(NetworkFailure('No internet connection'));
   }
 
   try {
+    print('Attempting to register user...'); // Debug log
     final user = await remote.register(name, email, password);
     await local.cacheUser(user);
+    print('User registered successfully'); // Debug log
     return Right(user);
   } on ServerException catch (_) {
+    print('Server exception occurred'); // Debug log
     return Left(ServerFailure());
   } catch (e) {
+    print('Other exception: $e'); // Debug log
     return Left(ServerFailure(e.toString()));
   }
 }
