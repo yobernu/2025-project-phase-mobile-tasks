@@ -1,47 +1,87 @@
-import 'package:ecommerce_app/features/auth/data/models/auth_model.dart';
-import 'chat_model.dart';
-import '../../domain/entities/message.dart';
+import 'package:ecommerce_app/features/messaging/domain/entities/message.dart';
+
+enum MessageStatus { sent, delivered, read, pending, pendingRead }
 
 class MessageModel {
   final String id;
-  final UserModel sender;
-  final ChatModel chat;
+  final String chatId;
+  final String senderId;
   final String content;
-  final String type;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final MessageStatus status;
 
   MessageModel({
     required this.id,
-    required this.sender,
-    required this.chat,
+    required this.chatId,
+    required this.senderId,
     required this.content,
-    required this.type,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.status,
   });
+
+  MessageModel copyWith({
+    String? id,
+    String? chatId,
+    String? senderId,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    MessageStatus? status,
+  }) {
+    return MessageModel(
+      id: id ?? this.id,
+      chatId: chatId ?? this.chatId,
+      senderId: senderId ?? this.senderId,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      status: status ?? this.status,
+    );
+  }
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
       id: json['_id'],
-      sender: UserModel.fromJson(json['sender']),
-      chat: ChatModel.fromJson(json['chat']),
+      chatId: json['chatId'],
+      senderId: json['senderId'],
       content: json['content'],
-      type: json['type'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+      status: json['status'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'sender': sender,
-      'chat': chat,
+      'chatId': chatId,
+      'senderId': senderId,
       'content': content,
-      'type': type
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'status': status,
     };
   }
 
   Message toEntity() => Message(
-        id: id,
-        sender: sender.toEntity(),
-        chat: chat.toEntity(),
-        content: content,
-        type: type,
-      );
+    id: id,
+    chatId: chatId,
+    senderId: senderId,
+    content: content,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    status: status,
+  );
+
+  factory MessageModel.fromEntity(Message message) => MessageModel(
+    id: message.id,
+    chatId: message.chatId,
+    senderId: message.senderId,
+    content: message.content,
+    createdAt: message.createdAt,
+    updatedAt: message.updatedAt,
+    status: message.status,
+  );
 }

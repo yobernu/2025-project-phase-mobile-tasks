@@ -4,10 +4,9 @@ import 'package:ecommerce_app/features/messaging/domain/entities/chat.dart';
 import 'package:ecommerce_app/features/messaging/domain/repository/chat_repository.dart';
 
 class CreateChatParams {
-  final String user1Id;
-  final String user2Id;
+  final String userId;
 
-  CreateChatParams({required this.user1Id, required this.user2Id});
+  CreateChatParams({required this.userId});
 }
 
 class CreateChatUseCase {
@@ -16,9 +15,6 @@ class CreateChatUseCase {
   CreateChatUseCase(this.repository);
 
   Future<Either<Failure, Chat>> call(CreateChatParams params) {
-    return repository.createChat(
-      user1Id: params.user1Id,
-      user2Id: params.user2Id,
-    );
+    return repository.initiateChat(participantId: params.userId);
   }
 }

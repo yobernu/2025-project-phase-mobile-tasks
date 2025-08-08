@@ -1,13 +1,23 @@
 import 'package:ecommerce_app/features/auth/domain/entities/auth.dart';
+import 'package:ecommerce_app/features/messaging/domain/entities/message.dart';
 
 class Chat {
-  final String id;
-  final User user1;
-  final User user2;
+   final String id;
+  final List<User> participants;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final Message? lastMessage;
 
   Chat({
     required this.id,
-    required this.user1,
-    required this.user2,
+    required this.participants,
+    required this.createdAt,
+    required this.updatedAt,
+    this.lastMessage,
   });
+
+
+
+
+
 }

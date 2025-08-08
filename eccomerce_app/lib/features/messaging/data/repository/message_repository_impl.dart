@@ -1,47 +1,143 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/core/network/network_info.dart';
-import 'package:ecommerce_app/features/auth/data/models/auth_model.dart';
-import 'package:ecommerce_app/features/messaging/data/datasource/chat_local_data_source.dart';
-import 'package:ecommerce_app/features/messaging/data/datasource/chat_remote_data_source.dart';
-import 'package:ecommerce_app/features/messaging/data/modal/chat_model.dart';
-import 'package:ecommerce_app/features/messaging/data/modal/message_model.dart';
+import 'package:ecommerce_app/features/messaging/data/datasource/message_local_data_source.dart';
+import 'package:ecommerce_app/features/messaging/data/datasource/message_remote_local_Datasource.dart';
+import 'package:ecommerce_app/features/messaging/data/model/message_model.dart';
 import 'package:ecommerce_app/features/messaging/domain/entities/message.dart';
-import 'package:ecommerce_app/features/messaging/domain/repository/message_repository.dart';
+import 'package:ecommerce_app/features/messaging/domain/repository/message_Repository.dart';
+
+
 
 class MessageRepositoryImpl implements MessageRepository {
+  final MessageRemoteDataSource remoteDataSource;
+  final MessageLocalDataSource localDataSource;
+  final NetworkInfo networkInfo;
+  final StreamController<Message> _messageStreamController = StreamController.broadcast();
 
-  final ChatRemoteDataSource remote;
-  final ChatLocalDataSource local;
-  final NetworkInfo network;
+  MessageRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.networkInfo,
+  }) {
+    _setupMessageListener();
+  }
 
-  
-  const MessageRepositoryImpl(this.remote, this.local, this.network);
+  void _setupMessageListener() {
+    remoteDataSource.messageStream.listen((messageModel) {
+      final message = messageModel.toEntity();
+      _messageStreamController.add(message);
+      localDataSource.cacheMessage(messageModel);
+    });
+  }
+
   @override
-  Future<Either<Failure, Message>> sendMessage({required Message message}) async {
-    try {
-      final model = MessageModel(
-      id: message.id,
-      sender: UserModel.fromEntity(message.sender),
-      chat: ChatModel(
-        id: message.chat.id,
-        user1: UserModel.fromEntity(message.chat.user1),
-        user2: UserModel.fromEntity(message.chat.user2),
-      ),
-      content: message.content,
-      type: message.type,
-    );
-
-      // TODO: Send to API or local DB
-      // await apiClient.post('/messages', data: model.toJson());
-
-      // Simulate success by returning the entity back
-      return Right(model.toEntity());
-    } catch (e) {
-      return Left(ServerFailure());
+  Future<Either<Failure, List<Message>>> getMessages(String chatId) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final messageModels = await remoteDataSource.getMessages(chatId);
+        await localDataSource.cacheMessages(chatId, messageModels);
+        return Right(messageModels.map((model) => model.toEntity()).toList());
+      } catch (e) {
+        try {
+          final localMessages = await localDataSource.getCachedMessages(chatId);
+          return Right(localMessages.map((model) => model.toEntity()).toList());
+        } catch (cacheException) {
+          return Left(ServerFailure());
+        }
+      }
+    } else {
+      try {
+        final localMessages = await localDataSource.getCachedMessages(chatId);
+        return Right(localMessages.map((model) => model.toEntity()).toList());
+      } catch (e) {
+        return Left(CacheFailure());
+      }
     }
   }
 
-  // Send to API or local DB
-  // await apiClient.post('/messages', data: model.toJson());
+  @override
+  Future<Either<Failure, Unit>> sendMessage({
+    required String chatId,
+    required String content,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.sendMessage(chatId: chatId, content: content);
+        return const Right(unit);
+      } catch (e) {
+        return Left(ServerFailure());
+      }
+    } else {
+      try {
+        final pendingMessage = MessageModel(
+          id: 'pending-${DateTime.now().millisecondsSinceEpoch}',
+          chatId: chatId,
+          senderId: 'current_user_id', // Get this from your auth system
+          content: content,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          status: MessageStatus.pending,
+        );
+        
+        await localDataSource.cachePendingMessage(pendingMessage);
+        return const Right(unit);
+      } catch (e) {
+        return Left(CacheFailure());
+      }
+    }
+  }
+
+  @override
+  Stream<Message> get messageStream => _messageStreamController.stream;
+
+  @override
+  Future<Either<Failure, Unit>> markAsRead(String messageId) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.markAsRead(messageId);
+        await localDataSource.updateMessageStatus(messageId, MessageStatus.read);
+        return const Right(unit);
+      } catch (e) {
+        return Left(ServerFailure());
+      }
+    } else {
+      try {
+        await localDataSource.updateMessageStatus(messageId, MessageStatus.pendingRead);
+        return const Right(unit);
+      } catch (e) {
+        return Left(CacheFailure());
+      }
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> resendPendingMessages() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final pendingMessages = await localDataSource.getPendingMessages();
+        
+        for (final message in pendingMessages) {
+          await remoteDataSource.sendMessage(
+            chatId: message.chatId,
+            content: message.content,
+          );
+          await localDataSource.removePendingMessage(message.id);
+        }
+        
+        return const Right(unit);
+      } catch (e) {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(NetworkFailure());
+    }
+  }
+
+  @override
+  Future<void> dispose() {
+    return _messageStreamController.close();
+  }
 }
