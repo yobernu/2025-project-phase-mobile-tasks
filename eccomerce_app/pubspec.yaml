@@ -55,6 +55,7 @@ dependencies:
   # Local storage
   shared_preferences: ^2.2.2
   bloc: ^8.1.4
+  dio: ^5.9.0
 
 
 

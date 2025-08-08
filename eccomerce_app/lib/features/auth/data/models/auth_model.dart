@@ -24,6 +24,15 @@ class UserModel extends User{
     );
   }
 
+  factory UserModel.fromEntity(User user) {
+    return UserModel(
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    );
+  }
+
   @override
   Map<String, dynamic> toJson() {
     return {
@@ -32,5 +41,14 @@ class UserModel extends User{
       'email': email,
       'role': role
     };
+  }
+
+  User toEntity() {
+    return User(
+      id: id,
+      name: name,
+      email: email,
+      role: role,
+    );
   }
 }
