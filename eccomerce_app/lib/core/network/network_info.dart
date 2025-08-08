@@ -13,23 +13,17 @@ class NetworkInfoImpl implements NetworkInfo {
   @override
   Future<bool> get isConnected async {
     try {
-      // Try the original method first
       final result = await internetConnectionChecker.hasConnection;
-      print('InternetConnectionChecker result: $result');
       
-      // If that fails, try a simple HTTP request
       if (!result) {
-        print('Trying HTTP fallback...');
         final response = await http.get(Uri.parse('https://www.google.com')).timeout(
           Duration(seconds: 5),
         );
-        print('HTTP fallback result: ${response.statusCode}');
         return response.statusCode == 200;
       }
       
       return result;
     } catch (e) {
-      print('Network check error: $e');
       return false;
     }
   }
