@@ -1,6 +1,8 @@
 import 'package:ecommerce_app/features/auth/presentation/Pages/navigation/navigation.dart';
+import 'package:ecommerce_app/features/messaging/presentation/socket_manager.dart';
 
-import 'injection_container.dart' as di;
+import 'injection_container.dart' as message_injection;
+import '../auth/injection_container.dart' as user_injection;
 import 'package:flutter/material.dart'; 
 
 
@@ -8,8 +10,9 @@ import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await di.init();
-  await SocketManager.initialize();
+  await message_injection.init();
+  await user_injection.init();
+  // await SocketManager.initialize();
   runApp(MyApp());
 }
 

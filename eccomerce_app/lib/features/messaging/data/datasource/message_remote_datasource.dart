@@ -20,7 +20,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   
   final StreamController<MessageModel> _messageStreamController = StreamController.broadcast();
 
-  MessageRemoteDataSourceImpl({required this.client, required this.socket}) {
+  MessageRemoteDataSourceImpl({required this.client, required this.socket, required Object prefs}) {
     _setupSocketListeners();
   }
 

@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/core/network/network_info.dart';
 import 'package:ecommerce_app/features/messaging/data/datasource/message_local_data_source.dart';
-import 'package:ecommerce_app/features/messaging/data/datasource/message_remote_local_Datasource.dart';
+import 'package:ecommerce_app/features/messaging/data/datasource/message_remote_datasource.dart';
 import 'package:ecommerce_app/features/messaging/data/model/message_model.dart';
 import 'package:ecommerce_app/features/messaging/domain/entities/message.dart';
 import 'package:ecommerce_app/features/messaging/domain/repository/message_Repository.dart';

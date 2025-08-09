@@ -9,6 +9,7 @@ import 'package:ecommerce_app/features/messaging/domain/repository/chat_reposito
 import 'package:ecommerce_app/features/messaging/domain/usecases/create_chat_usecase.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/get_chat_by_id_usecase.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/get_my_chat_usecase.dart';
+import 'package:ecommerce_app/features/messaging/domain/usecases/message_usecases/get_message_usecases.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/message_usecases/mark_as_read_usecase.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/message_usecases/resend_pending_messages_usecase.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/message_usecases/send_messages.usecase.dart';
@@ -38,7 +39,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateChatUseCase(sl()));
   sl.registerLazySingleton(() => GetChatByIdUseCase(sl()));
   sl.registerLazySingleton(() => GetChatsForUserUseCase(sl()));
-  sl.registerLazySingleton(() => GetChatsForUserUseCase(sl()));
+  sl.registerLazySingleton(() => GetMessageUseCase(sl()));
   sl.registerLazySingleton(() => SendMessageUseCase(sl()));
   sl.registerLazySingleton(() => MarkAsReadUseCase(sl()));
   sl.registerLazySingleton(() => ResendPendingMessagesUseCase(sl()));

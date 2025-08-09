@@ -19,4 +19,7 @@ class Message {
     required this.updatedAt,
     required this.status
   });
+
+
+  
 }

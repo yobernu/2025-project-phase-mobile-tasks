@@ -2,7 +2,7 @@ import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/core/usecases/usecases.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/create_chat_usecase.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/get_chat_by_id_usecase.dart';
-import 'package:ecommerce_app/features/messaging/domain/usecases/get_my_chat.dart';
+import 'package:ecommerce_app/features/messaging/domain/usecases/get_my_chat_usecase.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/message_usecases/get_message_usecases.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/message_usecases/mark_as_read_usecase.dart';
 import 'package:ecommerce_app/features/messaging/domain/usecases/message_usecases/resend_pending_messages_usecase.dart';

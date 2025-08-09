@@ -54,6 +54,7 @@
 
 import 'package:ecommerce_app/features/auth/domain/entities/auth.dart';
 import 'package:ecommerce_app/features/messaging/data/model/message_model.dart';
+import 'package:ecommerce_app/features/messaging/domain/entities/chat.dart';
 
 class ChatModel {
   final String id;
