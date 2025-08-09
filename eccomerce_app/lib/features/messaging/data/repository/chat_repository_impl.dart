@@ -8,13 +8,13 @@ import 'package:ecommerce_app/features/messaging/domain/entities/chat.dart';
 import 'package:ecommerce_app/features/messaging/domain/repository/chat_repository.dart';
 
 class ChatRepositoryImpl implements ChatRepository {
-  final ChatRemoteDataSource remoteDataSource;
-  final ChatLocalDataSource localDataSource;
+  final ChatRemoteDataSource remote;
+  final ChatLocalDataSource local;
   final NetworkInfo networkInfo;
 
   ChatRepositoryImpl({
-    required this.remoteDataSource,
-    required this.localDataSource,
+    required this.remote,
+    required this.local,
     required this.networkInfo,
   });
 
@@ -22,8 +22,8 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<Either<Failure, Chat>> initiateChat({required String participantId}) async {
     if (await networkInfo.isConnected) {
       try {
-        final chat = await remoteDataSource.initiateChat(participantId: participantId);
-        await localDataSource.cacheChat(chat);
+        final chat = await remote.initiateChat(participantId: participantId);
+        await local.cacheChat(chat);
         return Right(chat.toEntity());
       } on ServerException catch (_) {
         return Left(ServerFailure());
@@ -39,7 +39,7 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<Either<Failure, Chat>> getChatById({required String chatId}) async {
     try {
       // Try local first
-      final localChat = await localDataSource.getChatById(chatId);
+      final localChat = await local.getChatById(chatId);
       if (localChat != null) {
         return Right(localChat.toEntity());
       }
@@ -47,8 +47,8 @@ class ChatRepositoryImpl implements ChatRepository {
       // Fallback to remote if connected
       if (await networkInfo.isConnected) {
         try {
-          final remoteChat = await remoteDataSource.getChatById(chatId: chatId);
-          await localDataSource.cacheChat(remoteChat);
+          final remoteChat = await remote.getChatById(chatId: chatId);
+          await local.cacheChat(remoteChat);
           return Right(remoteChat.toEntity());
         } on ServerException catch (_) {
           return Left(ServerFailure());
@@ -57,28 +57,28 @@ class ChatRepositoryImpl implements ChatRepository {
 
       return Left(CacheFailure());
     } catch (e) {
-      return Left(CacheFailure());
+      return Left(CacheFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, List<Chat>>> getUserChats() async {
+  Future<Either<Failure, List<Chat>>> getMyChats() async {
     try {
       if (await networkInfo.isConnected) {
         try {
-          final remoteChats = await remoteDataSource.getUserChats();
-          await localDataSource.cacheChats(remoteChats);
+          final remoteChats = await remote.getUserChats();
+          await local.cacheChats(remoteChats);
           return Right(remoteChats.map((model) => model.toEntity()).toList());
-        } on ServerException catch (e) {
+        } on ServerException catch (_) {
           // Fallback to cache if remote fails
-          final localChats = await localDataSource.getCachedChats();
+          final localChats = await local.getCachedChats();
           if (localChats.isNotEmpty) {
             return Right(localChats.map((model) => model.toEntity()).toList());
           }
           return Left(ServerFailure());
         }
       } else {
-        final localChats = await localDataSource.getCachedChats();
+        final localChats = await local.getCachedChats();
         if (localChats.isNotEmpty) {
           return Right(localChats.map((model) => model.toEntity()).toList());
         }
@@ -93,10 +93,10 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<Either<Failure, Unit>> deleteChat({required String chatId}) async {
     if (await networkInfo.isConnected) {
       try {
-        await remoteDataSource.deleteChat(chatId: chatId);
-        await localDataSource.deleteCachedChat(chatId);
+        await remote.deleteChat(chatId: chatId);
+        await local.deleteCachedChat(chatId);
         return const Right(unit);
-      } on ServerException catch (e) {
+      } on ServerException catch (_) {
         return Left(ServerFailure());
       }
     } else {
@@ -104,9 +104,5 @@ class ChatRepositoryImpl implements ChatRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, List<Chat>>> getMyChats() {
-    // TODO: implement getMyChats
-    throw UnimplementedError();
-  }
+ 
 }
