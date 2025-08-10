@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'injection_container.dart' as chat_di;
 import 'presentation/bloc/chat_bloc.dart';
-import 'presentation/pages/chat_list_page.dart';
+import 'presentation/pages/chat_home_screen.dart';
 
 /// Main entry point for the Chat feature
 /// This class provides easy integration with your main app
@@ -12,8 +12,14 @@ class ChatFeature {
   /// Initialize the chat feature dependencies
   static Future<void> initialize() async {
     if (!_initialized) {
-      await chat_di.initChatFeature();
-      _initialized = true;
+      try {
+        await chat_di.initChatFeature();
+        _initialized = true;
+      } catch (e) {
+        // Reset initialization flag on error so it can be retried
+        _initialized = false;
+        rethrow;
+      }
     }
   }
 
@@ -25,7 +31,7 @@ class ChatFeature {
 
     return BlocProvider(
       create: (context) => chat_di.sl<ChatBloc>(),
-      child: const ChatListPage(),
+      child: const ChatScreen(),
     );
   }
 
@@ -33,7 +39,7 @@ class ChatFeature {
   static Widget getChatPageWithCustomBloc(ChatBloc chatBloc) {
     return BlocProvider.value(
       value: chatBloc,
-      child: const ChatListPage(),
+      child: const ChatScreen(),
     );
   }
 

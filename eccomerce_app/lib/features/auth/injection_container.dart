@@ -26,10 +26,10 @@ Future<void> init() async {
   );
 
   // External
-  // final sharedPreferences = await SharedPreferences.getInstance();
-  // sl.registerLazySingleton(() => sharedPreferences);
-  // sl.registerLazySingleton(() => http.Client());
-  // sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => http.Client());
+  sl.registerLazySingleton(() => InternetConnectionChecker.instance);
 
   // Data sources
   sl.registerLazySingleton<RemoteAuthDataSource>(

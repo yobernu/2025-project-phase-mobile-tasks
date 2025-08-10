@@ -1,8 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:ecommerce_app/core/network/network_info.dart';
 
 // Domain
 import 'domain/repositories/chat_repository.dart';
@@ -25,62 +21,71 @@ import 'presentation/bloc/chat_bloc.dart';
 final sl = GetIt.instance;
 
 Future<void> initChatFeature() async {
-  // Use cases
-  sl.registerLazySingleton(() => GetChats(sl()));
-  sl.registerLazySingleton(() => GetChatById(sl()));
-  sl.registerLazySingleton(() => GetChatMessages(sl()));
-  sl.registerLazySingleton(() => InitiateChat(sl()));
-  sl.registerLazySingleton(() => DeleteChat(sl()));
-  sl.registerLazySingleton(() => SendMessage(sl()));
+  // Use cases - check if already registered
+  if (!sl.isRegistered<GetChats>()) {
+    sl.registerLazySingleton(() => GetChats(sl()));
+  }
+  if (!sl.isRegistered<GetChatById>()) {
+    sl.registerLazySingleton(() => GetChatById(sl()));
+  }
+  if (!sl.isRegistered<GetChatMessages>()) {
+    sl.registerLazySingleton(() => GetChatMessages(sl()));
+  }
+  if (!sl.isRegistered<InitiateChat>()) {
+    sl.registerLazySingleton(() => InitiateChat(sl()));
+  }
+  if (!sl.isRegistered<DeleteChat>()) {
+    sl.registerLazySingleton(() => DeleteChat(sl()));
+  }
+  if (!sl.isRegistered<SendMessage>()) {
+    sl.registerLazySingleton(() => SendMessage(sl()));
+  }
 
   // Repository
-  sl.registerLazySingleton<ChatRepository>(
-    () => ChatRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-      networkInfo: sl(),
-      socketService: sl(),
-    ),
-  );
+  if (!sl.isRegistered<ChatRepository>()) {
+    sl.registerLazySingleton<ChatRepository>(
+      () => ChatRepositoryImpl(
+        remoteDataSource: sl(),
+        localDataSource: sl(),
+        networkInfo: sl(),
+        socketService: sl(),
+      ),
+    );
+  }
 
   // Data sources
-  sl.registerLazySingleton<ChatRemoteDataSource>(
-    () => ChatRemoteDataSourceImpl(client: sl()),
-  );
+  if (!sl.isRegistered<ChatRemoteDataSource>()) {
+    sl.registerLazySingleton<ChatRemoteDataSource>(
+      () => ChatRemoteDataSourceImpl(client: sl()),
+    );
+  }
 
-  sl.registerLazySingleton<ChatLocalDataSource>(
-    () => ChatLocalDataSourceImpl(sharedPreferences: sl()),
-  );
+  if (!sl.isRegistered<ChatLocalDataSource>()) {
+    sl.registerLazySingleton<ChatLocalDataSource>(
+      () => ChatLocalDataSourceImpl(sharedPreferences: sl()),
+    );
+  }
 
   // Services
-  sl.registerLazySingleton(() => SocketService.instance);
+  if (!sl.isRegistered<SocketService>()) {
+    sl.registerLazySingleton(() => SocketService.instance);
+  }
 
-  // BLoC
-  sl.registerFactory(
-    () => ChatBloc(
-      getChats: sl(),
-      getChatById: sl(),
-      getChatMessages: sl(),
-      initiateChat: sl(),
-      deleteChat: sl(),
-      sendMessage: sl(),
-      chatRepository: sl(),
-    ),
-  );
+  // BLoC - using registerFactory is fine for multiple instances
+  if (!sl.isRegistered<ChatBloc>()) {
+    sl.registerFactory(
+      () => ChatBloc(
+        getChats: sl(),
+        getChatById: sl(),
+        getChatMessages: sl(),
+        initiateChat: sl(),
+        deleteChat: sl(),
+        sendMessage: sl(),
+        chatRepository: sl(),
+      ),
+    );
+  }
 
-  // External dependencies (if not already registered)
-  if (!sl.isRegistered<http.Client>()) {
-    sl.registerLazySingleton(() => http.Client());
-  }
-  
-  if (!sl.isRegistered<SharedPreferences>()) {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sl.registerLazySingleton(() => sharedPreferences);
-  }
-  
-  if (!sl.isRegistered<NetworkInfo>()) {
-    sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(
-      internetConnectionChecker: InternetConnectionChecker.instance,
-    ));
-  }
+  // External dependencies are now registered in auth injection container
+  // No need to register them again here since they're shared dependencies
 }
