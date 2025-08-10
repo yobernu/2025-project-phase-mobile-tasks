@@ -1,53 +1,45 @@
+// core/errors/failures.dart
 import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {
-  const Failure();
-  
-}
-
-// Common failure types for the ecommerce app
-class ServerFailure extends Failure {
   final String message;
   
-  const ServerFailure([this.message = 'Server error occurred']);
+  const Failure(this.message);
   
   @override
   List<Object?> get props => [message];
 }
 
-
-
-
-
-
+// Network failures
 class NetworkFailure extends Failure {
-  final String message;
-  
-  const NetworkFailure([this.message = 'Network error occurred']);
-  
-  @override
-  List<Object?> get props => [message];
+  const NetworkFailure([String message = 'Network error occurred']) 
+    : super(message);
 }
 
+// Server failures
+class ServerFailure extends Failure {
+  const ServerFailure([String message = 'Server error occurred'])
+    : super(message);
+}
 
-
-
+// Cache failures
 class CacheFailure extends Failure {
-  final String message;
-  const CacheFailure([this.message = 'Cache error occurred']);
-  @override
-  List<Object?> get props => [message];
+  const CacheFailure([String message = 'Cache error occurred'])
+    : super(message);
 }
 
-
-
-
+// Specific domain failures
 class ProductNotFoundFailure extends Failure {
-  final int productId;
+  final String productId;
   
-  const ProductNotFoundFailure(this.productId);
+  const ProductNotFoundFailure(this.productId)
+    : super('Product $productId not found');
   
   @override
-  List<Object?> get props => [productId];
+  List<Object?> get props => [productId, message];
 }
 
+class InvalidProductFailure extends Failure {
+  const InvalidProductFailure([String message = 'Invalid product data'])
+    : super(message);
+}

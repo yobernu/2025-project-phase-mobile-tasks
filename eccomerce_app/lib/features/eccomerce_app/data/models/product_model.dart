@@ -1,37 +1,53 @@
+// data/models/product_model.dart
 import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
-
 
 class ProductModel extends Product {
   const ProductModel({
-    int? id,
-    String? price,
-    String? description,
-    String? title,
-    String? imagePath,
+    required String id,
+    required String name,
+    required String description,
+    required double price,
+    required String imageUrl,
+    String? subtitle,
     String? rating,
     List<String>? sizes,
-    String? subtitle,
   }) : super(
-    id: id ?? 0,
-    price: price ?? '',
-    description: description ?? '',
-    title: title ?? '',
-    imagePath: imagePath ?? '',
-    rating: rating ?? '4.0',
-    sizes: sizes ?? const <String>[],
-    subtitle: subtitle ?? '',
-  );
+          id: id,
+          name: name,
+          description: description,
+          price: price,
+          imageUrl: imageUrl,
+          subtitle: subtitle,
+          rating: rating,
+          sizes: sizes,
+        );
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['id'],
-      price: json['price'],
-      description: json['description'],
-      title: json['title'],
-      imagePath: json['imagePath'],
-      rating: json['rating'],
-      sizes: (json['sizes'] as List<dynamic>).cast<String>(),
-      subtitle: json['subtitle'],
+      id: json['id'].toString(),
+      name: json['name']?.toString() ?? 'No Name',
+      description: json['description']?.toString() ?? 'No Description',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      imageUrl: json['imageUrl']?.toString() ?? '',
+      subtitle: json['subtitle']?.toString(),
+      rating: json['rating']?.toString(),
+      sizes: json['sizes'] != null 
+          ? (json['sizes'] as List).map((e) => e.toString()).toList()
+          : null,
     );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'imageUrl': imageUrl,
+      if (subtitle != null) 'subtitle': subtitle,
+      if (rating != null) 'rating': rating,
+      if (sizes != null) 'sizes': sizes,
+    };
   }
 }

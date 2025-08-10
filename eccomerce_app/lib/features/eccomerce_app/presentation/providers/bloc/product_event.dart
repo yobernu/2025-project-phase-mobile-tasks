@@ -33,6 +33,9 @@ class UpdateProductEvent extends ProductEvent {
   List<Object?> get props => [product];
 }
 
+
+
+
 class DeleteProductEvent extends ProductEvent {
   final String productId;
   
@@ -50,6 +53,9 @@ class CreateProductEvent extends ProductEvent {
   @override
   List<Object?> get props => [product];
 }
+
+
+
 
 
 

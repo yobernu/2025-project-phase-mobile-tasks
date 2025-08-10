@@ -1,11 +1,11 @@
+import 'package:flutter/material.dart';
 import 'injection_container.dart' as di;
-import 'package:flutter/material.dart'; 
-import 'presentation/pages/home_screen.dart';
-
+import 'presentation/pages/Navigation/navigation.dart';
 
 void main() async {
-  await di.init();
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init(); // Your DI setup
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -19,9 +19,8 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blue,
         fontFamily: 'Poppins',
       ),
-      home: HomeScreen(),
+      initialRoute: '/',
+      onGenerateRoute: Navigation.generateRoute,
     );
   }
 }
-
-

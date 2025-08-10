@@ -12,7 +12,7 @@ abstract class ProductLocalDataSources {
   Future<List<Product>> getAllProducts();
 
   /// Get a specific product by ID from local cache
-  Future<Product> getProductById(int id);
+  Future<Product> getProductById(String id);
 
   /// Cache a list of products locally
   Future<void> cacheProducts(List<Product> products);
@@ -24,7 +24,7 @@ abstract class ProductLocalDataSources {
   Future<void> updateProduct(Product product);
 
   /// Delete a product from local cache
-  Future<void> deleteProduct(int id);
+  Future<void> deleteProduct(String id);
 
   /// Clear all cached products
   Future<void> clearCache();
@@ -74,13 +74,13 @@ Future<void> cacheProducts(List<Product> products) async {
   }
 
   @override
-  Future<void> deleteProduct(int id) async{
+  Future<void> deleteProduct(String id) async{
     await sharedPreferences.remove('CACHED_PRODUCT_$id');
     }
 
 
   @override
-  Future<Product> getProductById(int id) {
+  Future<Product> getProductById(String id) {
     final jsonString = sharedPreferences.getString('CACHED_PRODUCT_$id');
     if (jsonString != null) {
       final product = ProductModel.fromJson(json.decode(jsonString));

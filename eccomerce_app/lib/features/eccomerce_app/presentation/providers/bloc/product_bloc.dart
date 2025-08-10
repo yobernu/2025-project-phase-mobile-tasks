@@ -49,7 +49,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         emit(ErrorState(_mapFailureToMessage(failure)));
       },
       (integer) async {
-        final result = await getSingleProductUsecase.call(GetProductByIdParams(integer));
+        final result = await getSingleProductUsecase.call(GetProductByIdParams(integer.toString()));
         emit(result.fold(
           (failure) => ErrorState(_mapFailureToMessage(failure)),
           (product) => LoadedSingleProductState(product),
@@ -58,14 +58,28 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
-  void _onUpdateProduct(UpdateProductEvent event, Emitter<ProductState> emit) async {
-    emit(const LoadingState());
-    final result = await updateProductUsecase.call(UpdateProductParams(event.product));
-    emit(result.fold(
-      (failure) => ErrorState(_mapFailureToMessage(failure)),
-      (_) => const LoadedAllProductsState([]),
-    ));
+
+
+   Future<void> _onUpdateProduct(
+  UpdateProductEvent event, 
+  Emitter<ProductState> emit,
+) async {
+  emit(const LoadingState());
+  
+  try {
+    // Assuming updateProductUsecase returns Future<Either<Failure, Product>>
+    final result = await updateProductUsecase.call(
+      UpdateProductParams(event.product),
+    );
+
+    result.fold(
+      (failure) => emit(ErrorState(_mapFailureToMessage(failure))),
+      (_) => emit(const LoadedAllProductsState([])),
+    );
+  } catch (e) {
+    emit(ErrorState('An unexpected error occurred'));
   }
+}
 
   void _onDeleteProduct(DeleteProductEvent event, Emitter<ProductState> emit) async {
     emit(const LoadingState());
@@ -75,11 +89,20 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         emit(ErrorState(_mapFailureToMessage(failure)));
       },
       (integer) async {
-        final result = await deleteProductUsecase.call(DeleteProductParams(integer));
-        emit(result.fold(
-          (failure) => ErrorState(_mapFailureToMessage(failure)),
-          (_) => const LoadedAllProductsState([]),
-        ));
+        final result = await deleteProductUsecase.call(DeleteProductParams(integer.toString()));
+        await result.fold(
+          (failure) async {
+            emit(ErrorState(_mapFailureToMessage(failure)));
+          },
+          (_) async {
+            // After successful deletion, reload all products
+            final productsResult = await getAllProductsUsecase.call(const GetAllProductsParams());
+            emit(productsResult.fold(
+              (failure) => ErrorState(_mapFailureToMessage(failure)),
+              (products) => LoadedAllProductsState(products),
+            ));
+          },
+        );
       },
     );
   }
@@ -105,4 +128,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         return 'Unexpected Error';
     }
   }
+
+
+
+
 }

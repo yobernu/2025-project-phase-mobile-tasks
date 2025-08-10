@@ -14,8 +14,8 @@ class InputConverter {
 }
 
 class InvalidInputFailure extends Failure {
-  const InvalidInputFailure();
+  const InvalidInputFailure() : super('Invalid input: Must be a positive integer');
   
   @override
-  List<Object?> get props => [];
-} 
+  List<Object?> get props => [message]; // Include message in props for equality comparison
+}

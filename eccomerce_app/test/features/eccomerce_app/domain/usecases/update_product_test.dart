@@ -33,10 +33,10 @@ class MockProductRepository implements ProductRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateProduct(Product product) async {
+  Future<Either<Failure, ProductModel>> updateProduct(Product product) async {
     _lastUpdatedProduct = product;
     return _shouldSucceed 
-        ? const Right(null)
+        ? const Right(ProductModel(id: 0, title: '', subtitle: '', price: '', rating: '', sizes: [], description: ''))
         : Left(ServerFailure('Failed to update product'));
   }
 

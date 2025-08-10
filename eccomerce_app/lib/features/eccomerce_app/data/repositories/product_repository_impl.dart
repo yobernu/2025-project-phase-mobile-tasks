@@ -20,153 +20,118 @@ class ProductRepositoryImpl implements ProductRepository {
   });
 
   @override
-  Future<Either<Failure, List<ProductModel>>> getAllProducts() async {
+   Future<Either<Failure, List<Product>>> getAllProducts() async {
     try {
-      final isConnected = await networkInfo.isConnected;
-      
-      if (isConnected) {
-        // Try to get from remote source
-        final remoteProductModels = await remoteDataSource.getAllProducts();
-        // Convert ProductModel to Product for local caching
-        final remoteProducts = remoteProductModels.map((model) => model as Product).toList();
-        // Cache the products locally
+      if (await networkInfo.isConnected) {
+        final remoteProducts = await remoteDataSource.getAllProducts();
         await localDataSource.cacheProducts(remoteProducts);
-        return Right(remoteProductModels);
+        return Right(remoteProducts);
       } else {
-        // Get from local cache when offline
         final localProducts = await localDataSource.getAllProducts();
-        // Convert Product to ProductModel for return
-        final localProductModels = localProducts.map((product) => ProductModel(
-          id: product.id,
-          price: product.price,
-          description: product.description,
-          title: product.title,
-          imagePath: product.imagePath,
-          rating: product.rating,
-          sizes: product.sizes,
-          subtitle: product.subtitle,
-        )).toList();
-        return Right(localProductModels);
+        if (localProducts.isEmpty) {
+          return Left(CacheFailure('No products found in cache'));
+        }
+        return Right(localProducts);
       }
-    } on ServerException {
-      return Left(ServerFailure());
-    } on CacheException {
-      return Left(ServerFailure());
-    } on ProductNotFoundException {
-      return Left(ServerFailure());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } on NetworkException {
+      return Left(NetworkFailure('No internet connection'));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred'));
     }
   }
 
   @override
-  Future<Either<Failure, ProductModel>> getProductById(int id) async {
+  Future<Either<Failure, Product>> getProductById(String id) async {
     try {
-      final isConnected = await networkInfo.isConnected;
-      
-      if (isConnected) {
-        // Try to get from remote source
-        final remoteProductModel = await remoteDataSource.getProductById(id);
-        // Convert ProductModel to Product for local caching
-        final remoteProduct = remoteProductModel as Product;
-        // Cache the product locally
+      if (await networkInfo.isConnected) {
+        final remoteProduct = await remoteDataSource.getProductById(id);
         await localDataSource.cacheProduct(remoteProduct);
-        return Right(remoteProductModel);
+        return Right(remoteProduct);
       } else {
-        // Get from local cache when offline
         final localProduct = await localDataSource.getProductById(id);
-        // Convert Product to ProductModel for return
-        final localProductModel = ProductModel(
-          id: localProduct.id,
-          price: localProduct.price,
-          description: localProduct.description,
-          title: localProduct.title,
-          imagePath: localProduct.imagePath,
-          rating: localProduct.rating,
-          sizes: localProduct.sizes,
-          subtitle: localProduct.subtitle,
-        );
-        return Right(localProductModel);
+        return Right(localProduct);
       }
-    } on ServerException {
-      return Left(ProductNotFoundFailure(id));
-    } on CacheException {
-      return Left(ProductNotFoundFailure(id));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
     } on ProductNotFoundException {
       return Left(ProductNotFoundFailure(id));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Failed to load product'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> createProduct(Product product) async {
+  Future<Either<Failure, Product>> createProduct(Product product) async {
     try {
-      final isConnected = await networkInfo.isConnected;
-      
-      if (isConnected) {
-        // Create in remote source
-        await remoteDataSource.createProduct(product);
-        // Cache locally
-        await localDataSource.cacheProduct(product);
-        return const Right(null);
+      if (await networkInfo.isConnected) {
+        final createdProduct = await remoteDataSource.createProduct(product);
+        await localDataSource.cacheProduct(createdProduct);
+        return Right(createdProduct);
       } else {
-        // Cache locally when offline (will sync when online)
         await localDataSource.cacheProduct(product);
-        return const Right(null);
+        return Right(product);
       }
-    } on ServerException {
-      return Left(ServerFailure());
-    } on CacheException {
-      return Left(ServerFailure());
-    } on ProductNotFoundException {
-      return Left(ServerFailure());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Failed to create product'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> updateProduct(Product product) async {
+  Future<Either<Failure, Product>> updateProduct(Product product) async {
     try {
-      final isConnected = await networkInfo.isConnected;
-      
-      if (isConnected) {
-        // Update in remote source
-        await remoteDataSource.updateProduct(product);
-        // Update local cache
-        await localDataSource.updateProduct(product);
-        return const Right(null);
+      if (await networkInfo.isConnected) {
+        final updatedProduct = await remoteDataSource.updateProduct(product);
+        await localDataSource.cacheProduct(updatedProduct);
+        return Right(updatedProduct);
       } else {
-        // Update local cache when offline
-        await localDataSource.updateProduct(product);
-        return const Right(null);
+        await localDataSource.cacheProduct(product);
+        return Right(product);
       }
-    } on ServerException {
-      return Left(ServerFailure());
-    } on CacheException {
-      return Left(ServerFailure());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
     } on ProductNotFoundException {
-      return Left(ServerFailure());
+      return Left(ProductNotFoundFailure(product.id));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Failed to update product'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> deleteProduct(int id) async {
+  Future<Either<Failure, Unit>> deleteProduct(String id) async {
     try {
-      final isConnected = await networkInfo.isConnected;
-      
-      if (isConnected) {
-        // Delete from remote source
+      if (await networkInfo.isConnected) {
         await remoteDataSource.deleteProduct(id);
-        // Delete from local cache
-        await localDataSource.deleteProduct(id);
-        return const Right(null);
-      } else {
-        // Delete from local cache when offline
-        await localDataSource.deleteProduct(id);
-        return const Right(null);
       }
-    } on ServerException {
-      return Left(ServerFailure());
-    } on CacheException {
-      return Left(ServerFailure());
+      await localDataSource.deleteProduct(id);
+      return const Right(unit);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
     } on ProductNotFoundException {
       return Left(ProductNotFoundFailure(id));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Failed to delete product'));
     }
   }
 }

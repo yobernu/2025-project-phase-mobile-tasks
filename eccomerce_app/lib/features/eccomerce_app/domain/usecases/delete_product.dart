@@ -4,7 +4,7 @@ import '../../../../core/usecases/usecases.dart';
 import '../repositories/product_repository.dart';
 
 class DeleteProductParams extends Params {
-  final int id;
+  final String id;
   const DeleteProductParams(this.id);
   
   @override
