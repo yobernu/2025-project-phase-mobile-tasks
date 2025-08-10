@@ -30,14 +30,18 @@ Future<Either<Failure, User>> signUp({
     final user = await remote.register(name, email, password);
     await local.cacheUser(user);
     return Right(user);
-  } on ServerException catch (_) {
-    return Left(ServerFailure());
+  } on ServerException catch (e) {
+    return Left(ServerFailure(e.message));
   } catch (e) {
     return Left(ServerFailure(e.toString()));
-  }
-}
   
-  @override
+}
+
+}
+
+
+
+@override
 Future<Either<Failure, User>> logIn({
   required String email,
   required String password,
@@ -50,17 +54,19 @@ Future<Either<Failure, User>> logIn({
 
   try {
     final user = await remote.login(email, password);
+
+    // Optional: cache token only, since user info is minimal
     await local.cacheUser(user);
+
     return Right(user);
-  } on ServerException catch (_) {
+  } on ServerException {
     return Left(ServerFailure());
   } catch (e) {
     return Left(ServerFailure(e.toString()));
   }
 }
-
 @override
-Future<Either<Failure, void>> signOut({required int id}) async {
+Future<Either<Failure, void>> signOut({required String id}) async {
   final isConnected = await networkInfo.isConnected;
 
   if (!isConnected) {
@@ -73,6 +79,50 @@ Future<Either<Failure, void>> signOut({required int id}) async {
     return const Right(null);
   } catch (e) {
     return Left(ServerFailure(e.toString()));
+  }
+}
+
+  @override
+Future<Either<Failure, User>> getCurrentUser() async {
+  try {
+    final user = await local.getCachedUser();
+    if (user != null) {
+      return Right(user);
+    } else {
+      return Left(CacheFailure('No cached user found'));
+    }
+  } catch (e) {
+    return Left(CacheFailure('Failed to retrieve cached user'));
+  }
+}
+  @override
+Future<Either<Failure, bool>> isAuthenticated() async {
+  try {
+    final token = await local.getAccessToken();
+    final isValid = token != null && token.isNotEmpty;
+    return Right(isValid);
+  } catch (e) {
+    return Left(CacheFailure('Failed to check authentication status'));
+  }
+}
+
+ @override
+Future<Either<Failure, String>> refreshToken() async {
+  if (!await networkInfo.isConnected) {
+    return Left(ServerFailure('No internet connection'));
+  }
+
+  try {
+    final refreshToken = await local.getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return Left(CacheFailure('No refresh token available'));
+    }
+
+    final newToken = await remote.refreshToken(refreshToken);
+    await local.saveAccessToken(newToken);
+    return Right(newToken);
+  } catch (e) {
+    return Left(ServerFailure('Failed to refresh token'));
   }
 }
 

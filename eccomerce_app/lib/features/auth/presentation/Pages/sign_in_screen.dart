@@ -36,7 +36,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     // Trigger sign in event
     context.read<UserBloc>().add(
-      LogInRequested(
+      LogInRequestedEvent(
         email: emailController.text,
         password: passwordController.text,
       ),
@@ -48,15 +48,15 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {
-        if (state is UserSuccess) {
+        if (state is UserSuccessState) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Sign in successful!')),
           );
           // Navigate to home screen
           Navigator.pushReplacementNamed(context, '/home-screen');
-        } else if (state is UserFailure) {
+        } else if (state is UserFailureState) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(content: Text(state.failure.toString())),
           );
         }
       },
@@ -120,8 +120,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 BlocBuilder<UserBloc, UserState>(
                   builder: (context, state) {
                     return SubmitButton(
-                      onPress: state is UserLoading ? null : _handleSignIn,
-                      title: state is UserLoading ? 'SIGNING IN...' : 'SIGN-IN',
+                      onPress: state is UserLoadingState ? null : _handleSignIn,
+                      title: state is UserLoadingState ? 'SIGNING IN...' : 'SIGN-IN',
                     );
                   },
                 ),

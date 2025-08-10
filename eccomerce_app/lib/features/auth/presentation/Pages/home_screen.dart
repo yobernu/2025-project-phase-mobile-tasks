@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: BlocBuilder<UserBloc, UserState>(
         builder: (context, state) {
-          if (state is UserSuccess) {
+          if (state is UserSuccessState) {
             return Padding(
               padding: EdgeInsets.all(20),
               child: Column(
@@ -151,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             );
-          } else if (state is UserLoading) {
+          } else if (state is UserLoadingState) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

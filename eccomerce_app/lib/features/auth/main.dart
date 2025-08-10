@@ -1,13 +1,16 @@
 import 'package:ecommerce_app/features/auth/presentation/Pages/navigation/navigation.dart';
+import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import 'injection_container.dart' as di;
 import 'package:flutter/material.dart'; 
 
-
+// main.dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,16 +18,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Auth App',
-      theme: ThemeData(
-        primaryColor: Colors.blue,
-        fontFamily: 'Poppins',
+    return BlocProvider(
+      create: (context) => GetIt.instance<UserBloc>(),
+      child: MaterialApp(
+        title: 'Auth App',
+        theme: ThemeData(
+          primaryColor: Colors.blue,
+          fontFamily: 'Poppins',
+        ),
+        onGenerateRoute: Navigation.generateRoute,
+        initialRoute: '/',
       ),
-      onGenerateRoute: Navigation.generateRoute,
-      initialRoute: '/',
     );
   }
 }
-
+  
 

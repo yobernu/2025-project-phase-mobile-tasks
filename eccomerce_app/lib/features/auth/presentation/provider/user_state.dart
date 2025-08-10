@@ -1,22 +1,60 @@
+import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/features/auth/domain/entities/auth.dart';
 
 abstract class UserState {}
 
-class UserInitial extends UserState {
+class UserInitialState extends UserState {
+  UserInitialState();
 }
 
-class UserLoading extends UserState {}
+class UserLoadingState extends UserState {}
 
-class UserSuccess extends UserState {
+class UserSuccessState extends UserState {
   final User user;
 
-  UserSuccess(this.user);
+  UserSuccessState(this.user);
 }
 
-class UserFailure extends UserState {
+class UserSignUpSuccessState extends UserState {
+  final User user;
+  UserSignUpSuccessState(this.user);
+}
+
+class UserLoggedInState extends UserState {
+  final User user;
+  
+  UserLoggedInState(this.user);
+}
+
+
+class UserTokenRefreshFailedState extends UserState {
   final String message;
-
-  UserFailure(this.message);
+  UserTokenRefreshFailedState(this.message);
 }
 
-class UserSignedOut extends UserState {}
+
+
+
+
+class UserSignedOutState extends UserState {}
+
+
+class UserAuthenticatedState extends UserState {
+  final User user;
+  
+  UserAuthenticatedState(this.user);
+  
+  @override
+  List<Object> get props => [user];
+}
+
+class UserUnauthenticatedState extends UserState {}
+
+
+
+
+class UserFailureState extends UserState {
+  final Failure failure;
+  
+  UserFailureState(this.failure);
+}

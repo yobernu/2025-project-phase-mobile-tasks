@@ -3,15 +3,17 @@ import 'package:ecommerce_app/features/auth/domain/entities/auth.dart';
 
 class UserModel extends User{
   const UserModel({
-    int? id,
+    String? id,
     String? name,
     String? email,
-    String? role
+    String? role,
+    String? accessToken,
   }) : super(
-    id: id ?? 0,
+    id: id ?? '0',
     name: name ?? '',
     email: email ?? '',
-    role: role ?? ''
+    role: role ?? '',
+    accessToken: accessToken ?? '0',
     );
 
 
@@ -21,6 +23,7 @@ class UserModel extends User{
       name: json['name'],
       email: json['email'],
       role: json['role'],
+      accessToken: json['accessToken']
     );
   }
 
@@ -30,7 +33,8 @@ class UserModel extends User{
       'id': id,
       'name': name,
       'email': email,
-      'role': role
+      'role': role,
+      'accessToken': accessToken
     };
   }
 }
