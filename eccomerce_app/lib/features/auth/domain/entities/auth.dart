@@ -15,19 +15,19 @@ class User extends Equatable {
     this.accessToken,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
-      role: json['role'] as String?,
-      accessToken: json['access_token'] as String?
-    );
-  }
+ factory User.fromJson(Map<String, dynamic> json) {
+  return User(
+    id: json['_id']?.toString() ?? '0',
+    name: json['name'] ?? '',
+    email: json['email'] ?? '',
+    role: json['role'] ?? '', 
+    accessToken: json['access_token'] ?? '', 
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      '_id': id,
       'name': name,
       'email': email,
       'role': role,

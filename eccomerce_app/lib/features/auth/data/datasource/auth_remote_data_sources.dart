@@ -3,7 +3,6 @@ import 'dart:developer' as dev;
 import 'package:ecommerce_app/core/errors/exceptions.dart';
 import 'package:ecommerce_app/features/auth/domain/entities/auth.dart';
 import 'package:http/http.dart' as http;
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 abstract class RemoteAuthDataSource {
   Future<User> register(String name, String email, String password);
@@ -14,6 +13,8 @@ abstract class RemoteAuthDataSource {
 
 const _baseUrl =
     'https://g5-flutter-learning-path-be-tvum.onrender.com/api/v2/auth';
+const _profileBaseUrl =
+    'https://g5-flutter-learning-path-be-tvum.onrender.com/api/v2';
 
 class RemoteAuthDataSourceImpl implements RemoteAuthDataSource {
   final headers = {
@@ -66,58 +67,115 @@ class RemoteAuthDataSourceImpl implements RemoteAuthDataSource {
     }
   }
 
+  @override
+  Future<User> login(String email, String password) async {
+    final url = Uri.parse('$_baseUrl/login');
+    final body = jsonEncode({'email': email, 'password': password});
 
+    dev.log('[LOGIN] Sending POST request to: $url');
+    dev.log('[LOGIN] Request body: $body');
 
-@override
-Future<User> login(String email, String password) async {
-  final url = Uri.parse('$_baseUrl/login');
-  final body = jsonEncode({'email': email, 'password': password});
+    try {
+      final response = await client.post(url, headers: headers, body: body);
 
-  dev.log('[LOGIN] Sending POST request to: $url');
-  dev.log('[LOGIN] Request body: $body');
+      dev.log('[LOGIN] Response status: ${response.statusCode}');
+      dev.log('[LOGIN] Response body: ${response.body}');
 
-  final response = await client.post(url, headers: headers, body: body);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final json = jsonDecode(response.body);
 
-  dev.log('[LOGIN] Response status: ${response.statusCode}');
-  dev.log('[LOGIN] Response body: ${response.body}');
+        // Safely extract token with proper null handling
+        final tokenData = json['data'];
+        if (tokenData == null) {
+          dev.log('[LOGIN] No data field in response');
+          throw ServerException('Invalid response format: missing data field');
+        }
 
-  if (response.statusCode == 200 || response.statusCode == 201) {
-    final json = jsonDecode(response.body);
-    dev.log('[LOGIN] Decoded JSON: $json');
+        final token = tokenData['access_token']?.toString();
+        dev.log('[LOGIN] Extracted access token: $token');
 
-    final token = json['data']?['access_token'];
-    dev.log('[LOGIN] Extracted access token: $token');
+        if (token == null || token.isEmpty) {
+          dev.log('[LOGIN] Token not found or empty in response');
+          throw ServerException(
+            'Authentication failed: no access token received',
+          );
+        }
 
-    if (token != null) {
-      final decoded = JwtDecoder.decode(token);
-      dev.log('[LOGIN] Decoded JWT: $decoded');
+        // 🔄 Fetch full user profile using /users/me
+        final profileUrl = Uri.parse('$_profileBaseUrl/users/me');
+        final profileResponse = await client.get(
+          profileUrl,
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        );
 
-      final userId = decoded['sub'] ?? '0';
-      final userEmail = decoded['email'] ?? email;
-      final userName = decoded['name'] ?? 'Unknown'; // if name is included
+        dev.log('[PROFILE] Response status: ${profileResponse.statusCode}');
+        dev.log('[PROFILE] Response body: ${profileResponse.body}');
 
-      final user = User(
-        id: userId,
-        name: userName,
-        email: userEmail,
-        role: null,
-        accessToken: token,
-      );
+        if (profileResponse.statusCode == 200) {
+          final profileJson = jsonDecode(profileResponse.body);
+          final data = profileJson['data'];
 
-      dev.log('[LOGIN] Constructed User: $user');
-      return user;
-    } else {
-      dev.log('[LOGIN] Token not found in response');
-      throw ServerException();
+          if (data == null) {
+            dev.log('[PROFILE] No data field in profile response');
+            throw ServerException(
+              'Invalid profile response: missing data field',
+            );
+          }
+
+          // Debug: Log the actual data structure
+          dev.log('[PROFILE] Raw profile data: $data');
+          dev.log('[PROFILE] Available keys: ${data.keys.toList()}');
+          dev.log('[PROFILE] _id field: ${data['_id']}');
+          dev.log('[PROFILE] id field: ${data['id']}');
+
+          // Create user with proper null safety
+          // Try both '_id' and 'id' fields as different APIs use different conventions
+          final userId =
+              data['_id']?.toString() ??
+              data['id']?.toString() ??
+              'unknown_user_${DateTime.now().millisecondsSinceEpoch}';
+
+          final user = User(
+            id: userId,
+            name: data['name']?.toString() ?? '',
+            email: data['email']?.toString() ?? '',
+            role: data['role']?.toString(),
+            accessToken: token,
+          );
+
+          dev.log('[LOGIN] Final User object: $user');
+          return user;
+        } else {
+          dev.log(
+            '[PROFILE] Failed to fetch user profile: ${profileResponse.statusCode}',
+          );
+          final errorBody = profileResponse.body.isNotEmpty
+              ? profileResponse.body
+              : 'Unknown error';
+          throw ServerException('Failed to fetch user profile: $errorBody');
+        }
+      } else {
+        dev.log('[LOGIN] Server returned error status: ${response.statusCode}');
+        final errorBody = response.body.isNotEmpty
+            ? jsonDecode(response.body)
+            : {};
+        final message = errorBody['message']?.toString() ?? 'Login failed';
+        throw ServerException(message);
+      }
+    } catch (e, stackTrace) {
+      dev.log('[LOGIN] Exception caught: $e');
+      dev.log('[LOGIN] Stack trace: $stackTrace');
+
+      if (e is ServerException) {
+        rethrow;
+      } else {
+        throw ServerException('Network error: ${e.toString()}');
+      }
     }
-  } else {
-    dev.log('[LOGIN] Server returned error status');
-    throw ServerException();
   }
-}
-
-
-
 
   @override
   Future<void> logout(String id) async {

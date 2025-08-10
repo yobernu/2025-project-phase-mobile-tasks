@@ -26,8 +26,8 @@ class LocalAuthDataSourceImpl implements LocalAuthDataSource {
   @override
   Future<void> cacheUser(User user) async {
     await prefs.setString(_userKey, jsonEncode(user.toJson()));
-    await prefs.setString(_accessTokenKey, user.accessToken.toString());
-    await prefs.setString(_refreshTokenKey, user.accessToken.toString());
+    await prefs.setString(_accessTokenKey, user.accessToken.toString() ?? '');
+    await prefs.setString(_refreshTokenKey, user.accessToken.toString() ?? '');
   }
 
   @override

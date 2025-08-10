@@ -6,11 +6,11 @@ class LogoWidget extends StatelessWidget {
   final double wsize;
 
   const LogoWidget({
-    Key? key,
+    super.key,
     this.fontSize = 117,
     this.hsize = 140,
-    this.wsize =340,
-  }) : super(key: key);
+    this.wsize = 340,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -96,7 +96,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         (user) {
           _currentUser = user;
           emit(UserLogInSuccessState(user));
-          emit(UserLogInSuccessState(user));
           _startSessionTimer();
         },
       );
