@@ -48,7 +48,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {
-        if (state is UserSuccessState) {
+        if (state is UserLogInSuccessState) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Sign in successful!')),
           );
@@ -61,7 +61,6 @@ class _SignInScreenState extends State<SignInScreen> {
         }
       },
       child: Scaffold(
-        body: Scaffold(
           body: Padding(
             padding: EdgeInsets.all(46),
             child: Column(
@@ -148,7 +147,7 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           ),
         ),
-      ),
+      
     );
   }
 }

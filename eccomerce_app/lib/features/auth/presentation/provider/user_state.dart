@@ -15,9 +15,17 @@ class UserSuccessState extends UserState {
   UserSuccessState(this.user);
 }
 
+
+
 class UserSignUpSuccessState extends UserState {
   final User user;
   UserSignUpSuccessState(this.user);
+}
+
+
+class UserLogInSuccessState extends UserState {
+  final User user;
+  UserLogInSuccessState(this.user);
 }
 
 class UserLoggedInState extends UserState {

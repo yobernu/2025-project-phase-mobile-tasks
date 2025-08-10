@@ -65,7 +65,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         (user) {
           _currentUser = user;
           emit(UserSignUpSuccessState(user));
-          emit(UserLoggedInState(user));
+          // emit(UserLoggedInState(user));
           _startSessionTimer();
         },
       );
@@ -95,7 +95,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         (failure) => emit(UserFailureState(failure)),
         (user) {
           _currentUser = user;
-          emit(UserLoggedInState(user));
+          emit(UserLogInSuccessState(user));
+          emit(UserLogInSuccessState(user));
           _startSessionTimer();
         },
       );

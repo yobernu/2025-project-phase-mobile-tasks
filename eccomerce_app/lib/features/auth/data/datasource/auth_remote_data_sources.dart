@@ -1,8 +1,9 @@
 import 'dart:convert';
-
+import 'dart:developer' as dev;
 import 'package:ecommerce_app/core/errors/exceptions.dart';
 import 'package:ecommerce_app/features/auth/domain/entities/auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 abstract class RemoteAuthDataSource {
   Future<User> register(String name, String email, String password);
@@ -65,29 +66,52 @@ class RemoteAuthDataSourceImpl implements RemoteAuthDataSource {
     }
   }
 
+
+
 @override
 Future<User> login(String email, String password) async {
   final url = Uri.parse('$_baseUrl/login');
   final body = jsonEncode({'email': email, 'password': password});
 
+  dev.log('[LOGIN] Sending POST request to: $url');
+  dev.log('[LOGIN] Request body: $body');
+
   final response = await client.post(url, headers: headers, body: body);
+
+  dev.log('[LOGIN] Response status: ${response.statusCode}');
+  dev.log('[LOGIN] Response body: ${response.body}');
 
   if (response.statusCode == 200 || response.statusCode == 201) {
     final json = jsonDecode(response.body);
+    dev.log('[LOGIN] Decoded JSON: $json');
+
     final token = json['data']?['access_token'];
+    dev.log('[LOGIN] Extracted access token: $token');
 
     if (token != null) {
-      return User(
-        id: '0', // placeholder until you fetch full profile
-        name: '',
-        email: email,
+      final decoded = JwtDecoder.decode(token);
+      dev.log('[LOGIN] Decoded JWT: $decoded');
+
+      final userId = decoded['sub'] ?? '0';
+      final userEmail = decoded['email'] ?? email;
+      final userName = decoded['name'] ?? 'Unknown'; // if name is included
+
+      final user = User(
+        id: userId,
+        name: userName,
+        email: userEmail,
         role: null,
         accessToken: token,
       );
+
+      dev.log('[LOGIN] Constructed User: $user');
+      return user;
     } else {
+      dev.log('[LOGIN] Token not found in response');
       throw ServerException();
     }
   } else {
+    dev.log('[LOGIN] Server returned error status');
     throw ServerException();
   }
 }

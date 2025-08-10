@@ -1,5 +1,5 @@
 // A home screen that displays the user's login/authentication status once logged in.
-
+import 'dart:developer' as dev;
 import 'package:ecommerce_app/features/auth/presentation/Pages/helpers/logo_widget.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_state.dart';
@@ -28,9 +28,12 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+      // UserLogInSuccessState, UserLoggedInState
       body: BlocBuilder<UserBloc, UserState>(
         builder: (context, state) {
-          if (state is UserSuccessState) {
+          // dev.log(state);
+          if (state is UserLogInSuccessState) {
+            
             return Padding(
               padding: EdgeInsets.all(20),
               child: Column(
@@ -96,6 +99,7 @@ class HomeScreen extends StatelessWidget {
                             color: Colors.black87,
                           ),
                         ),
+                        
                         SizedBox(height: 15),
                         _buildInfoRow('Name', state.user.name),
                         _buildInfoRow('Email', state.user.email),

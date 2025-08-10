@@ -27,7 +27,10 @@ class Navigation {
       case '/signup-screen':
         return MaterialPageRoute(builder: (_) => const SignUpScreen());
       case '/signin-screen':
-        return MaterialPageRoute(builder: (_) => const SignInScreen());
+        return MaterialPageRoute(
+          builder: (_) => const SignInScreen()
+          
+          );
       case '/home-screen':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       default:
