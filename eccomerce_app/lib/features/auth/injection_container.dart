@@ -22,14 +22,14 @@ Future<void> init() async {
   // Core
   sl.registerLazySingleton(() => InputConverter());
   sl.registerLazySingleton<NetworkInfo>(
-  () => NetworkInfoImpl(internetConnectionChecker: sl()),
-);
+    () => NetworkInfoImpl(internetConnectionChecker: sl()),
+  );
 
   // External
-  final sharedPreferences = await SharedPreferences.getInstance();
-  sl.registerLazySingleton(() => sharedPreferences);
-  sl.registerLazySingleton(() => http.Client());
-  sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
+  // final sharedPreferences = await SharedPreferences.getInstance();
+  // sl.registerLazySingleton(() => sharedPreferences);
+  // sl.registerLazySingleton(() => http.Client());
+  // sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
 
   // Data sources
   sl.registerLazySingleton<RemoteAuthDataSource>(
@@ -41,11 +41,7 @@ Future<void> init() async {
 
   // Repository
   sl.registerLazySingleton<UserRepository>(
-    () => UserRepositoryImpl(
-      remote: sl(),
-      local: sl(),
-      networkInfo: sl(),
-    ),
+    () => UserRepositoryImpl(remote: sl(), local: sl(), networkInfo: sl()),
   );
 
   // Use cases
@@ -57,13 +53,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RefreshTokenUseCase(sl()));
 
   // Bloc
-  sl.registerFactory(() => UserBloc(
-    signUpUseCase: sl(),
-    loginUseCase: sl(),
-    signOutUseCase: sl(),
-    checkAuthStatusUseCase: sl(),
-    getCurrentUserUseCase: sl(),
-    refreshTokenUseCase: sl(),
-    connectionChecker: sl(),
-  ));
+  sl.registerFactory(
+    () => UserBloc(
+      signUpUseCase: sl(),
+      loginUseCase: sl(),
+      signOutUseCase: sl(),
+      checkAuthStatusUseCase: sl(),
+      getCurrentUserUseCase: sl(),
+      refreshTokenUseCase: sl(),
+      connectionChecker: sl(),
+    ),
+  );
 }
