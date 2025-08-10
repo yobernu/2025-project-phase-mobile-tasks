@@ -84,17 +84,18 @@ class _CreateScreenState extends State<CreateScreen> {
 
     
       final Product newProduct = Product(
-        id: DateTime.now().millisecondsSinceEpoch,
-        imagePath: _imageFile!.path,
-        title: titleController.text.trim(),
+        id: '${DateTime.now().millisecondsSinceEpoch}',
+        imageUrl: _imageFile!.path,
+        name: titleController.text.trim(),
         subtitle: subtitleController.text.trim(),
-        price: priceController.text.trim(),
+        description: descriptionController.text.trim(),
+        price: double.parse(priceController.text.trim()),
         rating: ratingController.text.trim(),
         sizes: sizeController.text
             .split(',')
             .map((String s) => s.trim())
             .toList(),
-        description: descriptionController.text.trim(),
+        
       );
 
       _createProduct(newProduct);

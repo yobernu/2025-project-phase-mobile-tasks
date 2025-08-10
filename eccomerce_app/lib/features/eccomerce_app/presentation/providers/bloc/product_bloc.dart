@@ -49,7 +49,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         emit(ErrorState(_mapFailureToMessage(failure)));
       },
       (integer) async {
-        final result = await getSingleProductUsecase.call(GetProductByIdParams(integer));
+        final result = await getSingleProductUsecase.call(GetProductByIdParams(integer.toString()));
         emit(result.fold(
           (failure) => ErrorState(_mapFailureToMessage(failure)),
           (product) => LoadedSingleProductState(product),
@@ -89,7 +89,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         emit(ErrorState(_mapFailureToMessage(failure)));
       },
       (integer) async {
-        final result = await deleteProductUsecase.call(DeleteProductParams(integer));
+        final result = await deleteProductUsecase.call(DeleteProductParams(integer.toString()));
         await result.fold(
           (failure) async {
             emit(ErrorState(_mapFailureToMessage(failure)));

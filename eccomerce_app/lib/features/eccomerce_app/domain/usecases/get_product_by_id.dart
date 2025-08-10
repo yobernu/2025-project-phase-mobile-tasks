@@ -3,11 +3,11 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecases.dart';
 import '../entities/product.dart';
 import '../repositories/product_repository.dart';
-import '../../data/models/product_model.dart';
+// import '../../data/models/product_model.dart';
 
 // Params class for GetProductById use case
 class GetProductByIdParams extends Params {
-  final int id;
+  final String id;
   
   const GetProductByIdParams(this.id);
   
@@ -23,6 +23,6 @@ class GetProductById implements UseCase<Product, GetProductByIdParams> {
   @override
   Future<Either<Failure, Product>> call(GetProductByIdParams params) async {
     final result = await repository.getProductById(params.id);
-    return result.map((productModel) => productModel as Product);
+    return result.map((productModel) => productModel);
   }
 }

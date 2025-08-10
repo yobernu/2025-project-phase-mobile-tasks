@@ -19,8 +19,102 @@ class _DetailsScreenState extends State<DetailsScreen> {
   int selectedIndex = 0;
 
   void showError(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  Widget _buildImage() {
+    final imageUrl = widget.product.imageUrl;
+    
+    if (imageUrl.isEmpty) {
+      return const Icon(Icons.image, size: 50, color: Colors.grey);
+    }
+
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.image, size: 50, color: Colors.grey);
+        },
+      );
+    } else if (imageUrl.startsWith('images/')) {
+      return Image.asset(imageUrl, fit: BoxFit.cover);
+    } else {
+      return Image.file(File(imageUrl), fit: BoxFit.cover);
+    }
+  }
+
+  Widget _buildSizeSelector() {
+    final sizes = widget.product.sizes;
+    
+    if (sizes == null || sizes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Size:',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 60,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: sizes.length,
+            itemBuilder: (BuildContext context, int index) {
+              final size = sizes[index];
+              final isSelected = selectedIndex == index;
+
+              return GestureDetector(
+                onTap: () => setState(() => selectedIndex = index),
+                child: Container(
+                  width: 60,
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: isSelected
+                        ? const Color.fromRGBO(63, 81, 243, 1)
+                        : Colors.white,
+                    border: Border.all(
+                      color: const Color.fromARGB(30, 0, 0, 0),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      size,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? Colors.white : Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -49,44 +143,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           topLeft: Radius.circular(40),
                           topRight: Radius.circular(40),
                         ),
-                        child: widget.product.imagePath.startsWith('http')
-                            ? Image.network(
-                                widget.product.imagePath,
-                                // fit: BoxFit.cover,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value:
-                                              loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    loadingProgress
-                                                        .expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      );
-                                    },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(
-                                    Icons.image,
-                                    size: 50,
-                                    color: Colors.grey,
-                                  );
-                                },
-                              )
-                            : widget.product.imagePath.startsWith('images/')
-                            ? Image.asset(
-                                widget.product.imagePath,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.file(
-                                File(widget.product.imagePath),
-                                fit: BoxFit.cover,
-                              ),
+                        child: _buildImage(),
                       ),
                     ),
                     GestureDetector(
@@ -120,7 +177,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Row(
                         children: <Widget>[
                           Text(
-                            widget.product.subtitle,
+                            widget.product.subtitle ?? 'No subtitle',
                             style: const TextStyle(
                               letterSpacing: 1.2,
                               fontSize: 16,
@@ -129,28 +186,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             ),
                           ),
                           const Spacer(),
-                          Row(
-                            children: <Widget>[
-                              const Icon(
-                                Icons.star,
-                                color: Color.fromARGB(255, 255, 215, 1),
-                                size: 20,
-                              ),
-                              Text('(${widget.product.rating})'),
-                            ],
-                          ),
+                          if (widget.product.rating != null)
+                            Row(
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.star,
+                                  color: Color.fromARGB(255, 255, 215, 1),
+                                  size: 20,
+                                ),
+                                Text('(${widget.product.rating})'),
+                              ],
+                            ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Row(
                         children: <Widget>[
                           Flexible(
-                            fit: FlexFit.loose,
                             child: Text(
-                              widget.product.title,
-                              // maxLines: 2,
-                              overflow: TextOverflow.fade,
-                              softWrap: false,
+                              widget.product.name,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 24,
@@ -158,173 +212,30 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               ),
                             ),
                           ),
-
                           Text(
-                            '\$${widget.product.price}',
+                            '\$${widget.product.price.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                              fontSize: 16),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      widget.product.sizes.isNotEmpty
-                          ? Row(
-                              children: <Widget>[
-                                const Text(
-                                  'Size:',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  height: 60,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: widget.product.sizes.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                          final String size =
-                                              widget.product.sizes[index];
-                                          final bool isSelected =
-                                              selectedIndex == index;
-
-                                          return GestureDetector(
-                                            onTap: () => setState(
-                                              () => selectedIndex = index,
-                                            ),
-                                            child: Container(
-                                              width: 60,
-                                              margin: const EdgeInsets.only(
-                                                right: 8,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                color: isSelected
-                                                    ? const Color.fromRGBO(
-                                                        63,
-                                                        81,
-                                                        243,
-                                                        1,
-                                                      )
-                                                    : Colors.white,
-                                                border: Border.all(
-                                                  color: const Color.fromARGB(
-                                                    30,
-                                                    0,
-                                                    0,
-                                                    0,
-                                                  ),
-                                                ),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  size,
-                                                  style: TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: isSelected
-                                                        ? Colors.white
-                                                        : Colors.black,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                  ),
-                                ),
-                              ],
-                            )
-                          : const SizedBox.shrink(),
-                      const SizedBox(height: 16),
-
+                      _buildSizeSelector(),
                       Text(
                         widget.product.description,
                         style: const TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 24),
-
                       Row(
                         children: <Widget>[
                           // DELETE BUTTON
                           TextButton(
-                            onPressed: () async {
-                              // Show confirmation dialog
-                              final shouldDelete = await showDialog<bool>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Delete Product'),
-                                  content: const Text(
-                                    'Are you sure you want to delete this product?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, true),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              );
-
-                              if (shouldDelete != true) return;
-                              //  if (!mounted) return;
-                              // Show loading dialog
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (_) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-
-                              try {
-                                // Dispatch delete event to bloc
-                                context.read<ProductBloc>().add(
-                                  DeleteProductEvent(
-                                    widget.product.id.toString(),
-                                  ),
-                                );
-
-                                if (!mounted) return;
-
-                                // Close loading dialog
-                                Navigator.pop(context);
-
-                                // Show success message and navigate back
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Product deleted successfully',
-                                    ),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-
-                                Navigator.pop(
-                                  context,
-                                ); // Go back to previous screen
-                              } catch (e) {
-                                if (!mounted) return;
-                                Navigator.pop(context); // Close loading dialog
-                                showError('An error occurred: $e');
-                              }
-                            },
+                            onPressed: () => _confirmDelete(context),
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 44,
-                                vertical: 12,
-                              ),
+                                vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -342,27 +253,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             ),
                           ),
                           const Spacer(),
-
                           // UPDATE BUTTON
                           TextButton(
-                            onPressed: () async{
-                              await Navigator.pushNamed(
-                                context,
-                                '/product-updates',
-                                arguments: widget.product,
-                              );
-                            },
+                            onPressed: () => _navigateToUpdate(context),
                             style: TextButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(
-                                63,
-                                81,
-                                243,
-                                1,
-                              ),
+                              backgroundColor: const Color.fromRGBO(63, 81, 243, 1),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 44,
-                                vertical: 12,
-                              ),
+                                vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -387,5 +285,64 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Product'),
+        content: const Text('Are you sure you want to delete this product?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      context.read<ProductBloc>().add(
+        DeleteProductEvent(widget.product.id),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Product deleted successfully'),
+          backgroundColor: Colors.green),
+      );
+
+      Navigator.pop(context); // Go back
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading
+      showError('Failed to delete: $e');
+    }
+  }
+
+  Future<void> _navigateToUpdate(BuildContext context) async {
+    await Navigator.pushNamed(
+      context,
+      '/product-updates',
+      arguments: widget.product,
+    );
+    if (mounted) setState(() {}); // Refresh if updated
   }
 }

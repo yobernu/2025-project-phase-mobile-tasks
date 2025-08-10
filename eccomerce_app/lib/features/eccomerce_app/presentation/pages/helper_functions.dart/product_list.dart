@@ -152,14 +152,14 @@ class ProductList extends StatelessWidget {
                 ),
                 color: Colors.grey[200],
               ),
-              child: product.imagePath.isNotEmpty
+              child: product.imageUrl.isNotEmpty
                   ? ClipRRect(
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(12),
                       ),
-                      child: product.imagePath.startsWith('http')
+                      child: product.imageUrl.startsWith('http')
                           ? Image.network(
-                              product.imagePath,
+                              product.imageUrl,
                               fit: BoxFit.cover,
                               width: double.infinity,
                               loadingBuilder:
@@ -188,7 +188,7 @@ class ProductList extends StatelessWidget {
                               },
                             )
                           : Image.asset(
-                              product.imagePath,
+                              product.imageUrl,
                               fit: BoxFit.cover,
                               width: double.infinity,
                             ),
@@ -206,17 +206,18 @@ class ProductList extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      product.title,
+                        product.name,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
+                        color: Colors.amber
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      product.subtitle,
+                      product.subtitle ?? 'subtitle',
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -241,7 +242,7 @@ class ProductList extends StatelessWidget {
                               color: Colors.amber,
                             ),
                             Text(
-                              product.rating,
+                              product.rating ?? '4.0',
                               style: const TextStyle(fontSize: 10),
                             ),
                           ],
