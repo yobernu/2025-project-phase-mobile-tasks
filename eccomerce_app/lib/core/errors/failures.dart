@@ -20,7 +20,7 @@ class ServerFailure extends Failure {
   // final String message;
 
   // const ServerFailure([this.message = 'Server error occurred']);
-  const ServerFailure([String? message]) : super(message?? '');
+  const ServerFailure([String? message]) : super(message ?? '');
   @override
   List<Object?> get props => [message];
 }
@@ -33,7 +33,6 @@ class NetworkFailure extends Failure {
   List<Object?> get props => [message];
 }
 
-
 class ProductNotFoundFailure extends Failure {
   final int productId;
 
@@ -45,17 +44,15 @@ class ProductNotFoundFailure extends Failure {
 }
 
 class ChatFailure extends Failure {
-  const ChatFailure([String? message]) : super(message?? '');
+  const ChatFailure([String? message]) : super(message ?? '');
 
   @override
   List<Object?> get props => [message];
 }
 
-
-
 class CacheFailure extends Failure {
   const CacheFailure([String? message])
-      : super(message ?? 'Cache error occurred');
+    : super(message ?? 'Cache error occurred');
 
   @override
   List<Object?> get props => [message];

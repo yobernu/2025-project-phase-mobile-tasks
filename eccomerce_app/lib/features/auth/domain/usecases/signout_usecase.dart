@@ -4,10 +4,10 @@ import 'package:ecommerce_app/core/usecases/usecases.dart';
 import 'package:ecommerce_app/features/auth/domain/repositories/auth_repositories.dart';
 
 class SignOutParams extends Params {
-  final int id;
+  final String id;
 
   const SignOutParams({
-    required this.id
+    required this.id,
   });
 
   @override
@@ -22,6 +22,6 @@ class SignOutUseCase extends UseCase<void, SignOutParams> {
 
   @override
   Future<Either<Failure, void>> call(SignOutParams params) async {
-    return await repository.signOut(id: params.id);
+    return await repository.signOut(id: params.id.toString());
   }
 }
