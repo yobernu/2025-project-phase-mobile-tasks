@@ -1,9 +1,9 @@
 import 'package:ecommerce_app/features/auth/presentation/Pages/sign_in_screen.dart';
 import 'package:ecommerce_app/features/auth/presentation/Pages/sign_up_screen.dart';
 import 'package:ecommerce_app/features/auth/presentation/Pages/splash_screen.dart';
-import 'package:ecommerce_app/features/auth/presentation/Pages/home_screen.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_state.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/home_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
