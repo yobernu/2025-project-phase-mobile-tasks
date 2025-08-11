@@ -1,5 +1,4 @@
 // A home screen that displays the user's login/authentication status once logged in.
-
 import 'package:ecommerce_app/features/auth/presentation/Pages/helpers/logo_widget.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_state.dart';
@@ -28,9 +27,11 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+      // UserLogInSuccessState, UserLoggedInState
       body: BlocBuilder<UserBloc, UserState>(
         builder: (context, state) {
-          if (state is UserSuccess) {
+          // dev.log(state);
+          if (state is UserLogInSuccessState) {
             return Padding(
               padding: EdgeInsets.all(20),
               child: Column(
@@ -66,9 +67,9 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(height: 30),
-                  
+
                   // User information
                   Container(
                     width: double.infinity,
@@ -96,6 +97,7 @@ class HomeScreen extends StatelessWidget {
                             color: Colors.black87,
                           ),
                         ),
+
                         SizedBox(height: 15),
                         _buildInfoRow('Name', state.user.name),
                         _buildInfoRow('Email', state.user.email),
@@ -103,9 +105,9 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(height: 30),
-                  
+
                   // Action buttons
                   Row(
                     children: [
@@ -113,7 +115,9 @@ class HomeScreen extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Profile feature coming soon!')),
+                              SnackBar(
+                                content: Text('Profile feature coming soon!'),
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -132,7 +136,9 @@ class HomeScreen extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Settings feature coming soon!')),
+                              SnackBar(
+                                content: Text('Settings feature coming soon!'),
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -151,7 +157,7 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             );
-          } else if (state is UserLoading) {
+          } else if (state is UserLoadingState) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -169,18 +175,11 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.person_off,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
+                  Icon(Icons.person_off, size: 80, color: Colors.grey[400]),
                   SizedBox(height: 20),
                   Text(
                     'No user information available',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
@@ -219,12 +218,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                color: Colors.black87,
-              ),
-            ),
+            child: Text(value, style: TextStyle(color: Colors.black87)),
           ),
         ],
       ),

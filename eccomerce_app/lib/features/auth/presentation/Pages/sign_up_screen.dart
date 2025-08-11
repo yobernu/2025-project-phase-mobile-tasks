@@ -1,6 +1,4 @@
-import 'package:ecommerce_app/features/auth/presentation/Pages/helpers/form-input.dart';
 import 'package:ecommerce_app/features/auth/presentation/Pages/helpers/logo_widget.dart';
-import 'package:ecommerce_app/features/auth/presentation/Pages/helpers/submit_button.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_event.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_state.dart';
@@ -16,13 +14,11 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   bool isChecked = false;
-  bool isLoading = false;
-  
-  // Controllers for form inputs
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
@@ -34,173 +30,291 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _handleSignUp() {
+    // Debug log for form submission attempt
+    debugPrint('SignUp attempt initiated');
+    debugPrint('Name: ${nameController.text}');
+    debugPrint('Email: ${emailController.text}');
+
+    if (!_formKey.currentState!.validate()) {
+      debugPrint('Form validation failed');
+      return;
+    }
+
     if (!isChecked) {
+      debugPrint('Terms not accepted');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please accept the terms and conditions')),
+        const SnackBar(content: Text('Please accept the terms and conditions')),
       );
       return;
     }
 
-    if (passwordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Passwords do not match')),
-      );
-      return;
-    }
-
-    if (nameController.text.isEmpty || 
-        emailController.text.isEmpty || 
-        passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields')),
-      );
-      return;
-    }
-
-    // Trigger sign up event
+    // Trigger sign up
+    debugPrint('Dispatching SignUpRequestedEvent');
     context.read<UserBloc>().add(
-      SignUpRequested(
+      SignUpRequestedEvent(
         name: nameController.text,
         email: emailController.text,
         password: passwordController.text,
       ),
     );
-    // Navigator.pushNamed(context, 'login-screen');
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      debugPrint('Email field empty');
+      return 'Please enter your email';
+    }
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      debugPrint('Invalid email format: $value');
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      debugPrint('Password field empty');
+      return 'Please enter your password';
+    }
+    if (value.length < 6) {
+      debugPrint('Password too short: ${value.length} characters');
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value != passwordController.text) {
+      debugPrint('Password mismatch: $value vs ${passwordController.text}');
+      return 'Passwords do not match';
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {
-        if (state is UserSuccess) {
+        if (state is UserLoadingState) {
+          debugPrint('SignUp in progress...');
+        } else if (state is UserSignUpSuccessState) {
+          debugPrint('SignUp successful for user: ${state.user.email}');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign up successful!')),
+            const SnackBar(content: Text('Sign up successful! Please login.')),
           );
           Navigator.pushReplacementNamed(context, '/signin-screen');
-        } else if (state is UserFailure) {
+        } else if (state is UserFailureState) {
+          debugPrint('SignUp failed: ${state.failure}');
+          debugPrint('Stack trace: ${state.failure}');
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+            SnackBar(
+              content: Text(
+                state.failure.message ?? 'Sign up failed. Please try again.',
+              ),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       },
       child: Scaffold(
-        body: Scaffold(
-          // backgroundColor: Colors.amber,
-          body: Padding(
-            padding: EdgeInsets.all(46),
-            child: Column(
-              children: [
-                // header
-                Padding(
-                  padding: EdgeInsets.fromLTRB(0, 35, 0, 55),
-                  child: Row(
-                    children: <Widget>[
-                      GestureDetector(
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                        child: Icon(Icons.arrow_back),
-                      ),
-                      Spacer(),
-                      LogoWidget(fontSize: 18, wsize: 100, hsize: 40),
-                    ],
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(46),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // Header section
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 35, 0, 55),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const Spacer(),
+                        LogoWidget(fontSize: 18, wsize: 100, hsize: 40),
+                      ],
+                    ),
                   ),
-                ),
 
-                // create  text
-                Text(
-                  "Create your account",
-                  style: TextStyle(
-                    fontSize: 27,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    // fontFamily: Poppins
+                  // Title
+                  const Text(
+                    "Create your account",
+                    style: TextStyle(fontSize: 27, fontWeight: FontWeight.w600),
                   ),
-                ),
 
-                SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                Column(
+                  // Form fields
+                  Column(
                     children: [
-                      // name input
-                      FormInput(
-                        title: 'name', 
-                        placeholder: 'ex: john smith',
+                      TextFormField(
                         controller: nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Name',
+                          hintText: 'ex: john smith',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+                          labelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
+                        ),
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            debugPrint('Name field empty');
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
                       ),
 
-                      // email input
-                      FormInput(
-                        title: 'email', 
-                        placeholder: 'ex: john@example.com',
+                      const SizedBox(height: 16),
+
+                      TextFormField(
                         controller: emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'ex: john@example.com',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+
+                          labelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
+                        ),
+                        validator: _validateEmail,
+                        keyboardType: TextInputType.emailAddress,
                       ),
 
-                      //password input
-                      FormInput(
-                        title: 'password', 
-                        placeholder: 'Enter your password',
+                      const SizedBox(height: 16),
+
+                      TextFormField(
                         controller: passwordController,
-                        isPassword: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          hintText: 'Enter your password',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+                          labelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
+                        ),
+                        obscureText: true,
+                        validator: _validatePassword,
                       ),
 
-                      // confirm pass
-                      FormInput(
-                        title: 'confirm Password',
-                        placeholder: 'Confirm your password',
+                      const SizedBox(height: 16),
+
+                      TextFormField(
                         controller: confirmPasswordController,
-                        isPassword: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm Password',
+                          hintText: 'Confirm your password',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+                          labelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
+                        ),
+                        obscureText: true,
+                        validator: _validateConfirmPassword,
                       ),
                     ],
                   ),
 
-                SizedBox(height: 30),
-                // terms
-                Center(
-                  child: Row(
+                  const SizedBox(height: 30),
+
+                  // Terms checkbox
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Checkbox(
                         value: isChecked,
                         onChanged: (value) {
-                          setState(() {
-                            isChecked = value!;
-                          });
+                          debugPrint('Terms checkbox: ${value ?? false}');
+                          setState(() => isChecked = value ?? false);
                         },
                       ),
-
-                      Text("I understood the "),
+                      const Text("I understood the "),
                       Text(
                         "terms & policy",
-                        style: TextStyle(color: Color.fromRGBO(63, 81, 243, 1)),
+                        style: TextStyle(color: Theme.of(context).primaryColor),
                       ),
                     ],
                   ),
-                ),
-                // btn
-                BlocBuilder<UserBloc, UserState>(
-                  builder: (context, state) {
-                    return SubmitButton(
-                      onPress: state is UserLoading ? null : _handleSignUp, 
-                      title: state is UserLoading ? 'SIGNING UP...' : 'SIGN-UP'
-                    );
-                  },
-                ),
 
-                // sign in
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Have an account? "),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/signin-screen');
-                      }, 
-                      child: Text("SIGN-IN", style: TextStyle(color: Color.fromRGBO(63, 81, 243, 1)))
-                    ),
-                  ],
-                ),
-              ],
+                  // Submit button
+                  BlocBuilder<UserBloc, UserState>(
+                    builder: (context, state) {
+                      return SizedBox(
+                        width: 280,
+                        height: 40,
+                        child: ElevatedButton(
+                          onPressed: state is UserLoadingState
+                              ? null
+                              : _handleSignUp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: state is UserLoadingState
+                              ? const CircularProgressIndicator()
+                              : const Text(
+                                  'SIGN UP',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 60),
+
+                  // Sign in link
+                  TextButton(
+                    onPressed: () {
+                      debugPrint('Navigating to sign in screen');
+                      Navigator.pushReplacementNamed(context, '/signin-screen');
+                    },
+                    child: const Text("Already have an account? SIGN IN"),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

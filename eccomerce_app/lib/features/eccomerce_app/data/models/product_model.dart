@@ -3,24 +3,15 @@ import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dar
 
 class ProductModel extends Product {
   const ProductModel({
-    required String id,
-    required String name,
-    required String description,
-    required double price,
-    required String imageUrl,
-    String? subtitle,
-    String? rating,
-    List<String>? sizes,
-  }) : super(
-          id: id,
-          name: name,
-          description: description,
-          price: price,
-          imageUrl: imageUrl,
-          subtitle: subtitle,
-          rating: rating,
-          sizes: sizes,
-        );
+    required super.id,
+    required super.name,
+    required super.description,
+    required super.price,
+    required super.imageUrl,
+    super.subtitle,
+    super.rating = null,
+    super.sizes = null,
+  });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -31,7 +22,7 @@ class ProductModel extends Product {
       imageUrl: json['imageUrl']?.toString() ?? '',
       subtitle: json['subtitle']?.toString(),
       rating: json['rating']?.toString(),
-      sizes: json['sizes'] != null 
+      sizes: json['sizes'] != null
           ? (json['sizes'] as List).map((e) => e.toString()).toList()
           : null,
     );

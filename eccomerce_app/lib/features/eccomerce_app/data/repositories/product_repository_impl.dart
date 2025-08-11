@@ -6,7 +6,6 @@ import '../../data/datasources/product_local_data_sources.dart';
 import '../../data/datasources/product_remote_data_sources.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/repositories/product_repository.dart';
-import '../../data/models/product_model.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSources remoteDataSource;
@@ -20,7 +19,7 @@ class ProductRepositoryImpl implements ProductRepository {
   });
 
   @override
-   Future<Either<Failure, List<Product>>> getAllProducts() async {
+  Future<Either<Failure, List<Product>>> getAllProducts() async {
     try {
       if (await networkInfo.isConnected) {
         final remoteProducts = await remoteDataSource.getAllProducts();

@@ -4,7 +4,10 @@ import 'package:ecommerce_app/features/auth/data/datasource/auth_local_data_sour
 import 'package:ecommerce_app/features/auth/data/datasource/auth_remote_data_sources.dart';
 import 'package:ecommerce_app/features/auth/data/repositories/repository.dart';
 import 'package:ecommerce_app/features/auth/domain/repositories/auth_repositories.dart';
+import 'package:ecommerce_app/features/auth/domain/usecases/check_out_status_usecase.dart';
+import 'package:ecommerce_app/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:ecommerce_app/features/auth/domain/usecases/login_usecase.dart';
+import 'package:ecommerce_app/features/auth/domain/usecases/refreash_token_usecase.dart';
 import 'package:ecommerce_app/features/auth/domain/usecases/signout_usecase.dart';
 import 'package:ecommerce_app/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
@@ -14,42 +17,53 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> init() async {
-  final ls = GetIt.instance;
-
-  ls.registerFactory(
-    () => UserBloc(
-      userRepository: ls())
-  );
-
-
-// Usecases
-  ls.registerSingleton(() => SignUpUseCase(ls()));
-  ls.registerSingleton(() => LoginUseCase(ls()));
-  ls.registerSingleton(() => SignOutUseCase(ls()));
-
-
-
-  //repositories
-  ls.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(
-    local: ls(),
-    remote: ls(),
-    networkInfo: ls(),
-    ));
-
-  ls.registerLazySingleton<LocalAuthDataSource>(() => LocalAuthDataSourceImpl(prefs: ls()));
-  ls.registerLazySingleton<RemoteAuthDataSource>(() => RemoteAuthDataSourceImpl(client: ls()));
+  final sl = GetIt.instance;
 
   // Core
-  ls.registerLazySingleton(() => InputConverter());
+  sl.registerLazySingleton(() => InputConverter());
+  sl.registerLazySingleton<NetworkInfo>(
+  () => NetworkInfoImpl(internetConnectionChecker: sl()),
+);
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
-  ls.registerLazySingleton(() => sharedPreferences);
-  ls.registerLazySingleton(() => http.Client());
-  ls.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(internetConnectionChecker: ls()));
-  ls.registerLazySingleton(() => InternetConnectionChecker.createInstance());
-  
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => http.Client());
+  sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
 
+  // Data sources
+  sl.registerLazySingleton<RemoteAuthDataSource>(
+    () => RemoteAuthDataSourceImpl(client: sl()),
+  );
+  sl.registerLazySingleton<LocalAuthDataSource>(
+    () => LocalAuthDataSourceImpl(prefs: sl()),
+  );
 
+  // Repository
+  sl.registerLazySingleton<UserRepository>(
+    () => UserRepositoryImpl(
+      remote: sl(),
+      local: sl(),
+      networkInfo: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => SignUpUseCase(sl()));
+  sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton(() => SignOutUseCase(sl()));
+  sl.registerLazySingleton(() => CheckAuthStatusUseCase(sl()));
+  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
+  sl.registerLazySingleton(() => RefreshTokenUseCase(sl()));
+
+  // Bloc
+  sl.registerFactory(() => UserBloc(
+    signUpUseCase: sl(),
+    loginUseCase: sl(),
+    signOutUseCase: sl(),
+    checkAuthStatusUseCase: sl(),
+    getCurrentUserUseCase: sl(),
+    refreshTokenUseCase: sl(),
+    connectionChecker: sl(),
+  ));
 }
-

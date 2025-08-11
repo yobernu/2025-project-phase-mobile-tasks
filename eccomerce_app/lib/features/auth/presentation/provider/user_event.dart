@@ -1,22 +1,44 @@
-abstract class UserEvent {}
+import 'package:equatable/equatable.dart';
 
-class SignUpRequested extends UserEvent {
+
+
+abstract class UserEvent extends Equatable {
+  const UserEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+class SignUpRequestedEvent extends UserEvent {
   final String name;
   final String email;
   final String password;
 
-  SignUpRequested({required this.name, required this.email, required this.password});
+  const SignUpRequestedEvent({
+    required this.name,
+    required this.email,
+    required this.password,
+  });
+
+  @override
+  List<Object> get props => [name, email, password];
 }
 
-class LogInRequested extends UserEvent {
+
+
+class LogInRequestedEvent extends UserEvent {
   final String email;
   final String password;
 
-  LogInRequested({required this.email, required this.password});
+  const LogInRequestedEvent({required this.email, required this.password});
 }
 
-class SignOutRequested extends UserEvent {
-  final int userId;
+class SignOutRequestedEvent extends UserEvent {
+  final String userId;
 
-  SignOutRequested({required this.userId});
+  const SignOutRequestedEvent({required this.userId});
 }
+
+class CheckAuthenticationStatusEvent extends UserEvent {}
+
+class RefreshTokenEvent extends UserEvent {}
