@@ -158,12 +158,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           hintText: 'ex: john smith',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           border: InputBorder.none,
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             fontFamily: 'Poppins',
                           ),
-                          hintStyle: const TextStyle(
+                          hintStyle: TextStyle(
                             fontSize: 14,
                             fontFamily: 'Poppins',
                             color: Colors.grey,
@@ -189,12 +189,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           border: InputBorder.none,
 
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             fontFamily: 'Poppins',
                           ),
-                          hintStyle: const TextStyle(
+                          hintStyle: TextStyle(
                             fontSize: 14,
                             fontFamily: 'Poppins',
                             color: Colors.grey,
@@ -213,12 +213,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           hintText: 'Enter your password',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           border: InputBorder.none,
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             fontFamily: 'Poppins',
                           ),
-                          hintStyle: const TextStyle(
+                          hintStyle: TextStyle(
                             fontSize: 14,
                             fontFamily: 'Poppins',
                             color: Colors.grey,
