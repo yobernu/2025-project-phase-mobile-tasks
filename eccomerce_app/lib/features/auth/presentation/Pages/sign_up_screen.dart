@@ -5,8 +5,6 @@ import 'package:ecommerce_app/features/auth/presentation/provider/user_state.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -36,7 +34,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     debugPrint('SignUp attempt initiated');
     debugPrint('Name: ${nameController.text}');
     debugPrint('Email: ${emailController.text}');
-    
+
     if (!_formKey.currentState!.validate()) {
       debugPrint('Form validation failed');
       return;
@@ -99,18 +97,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
       listener: (context, state) {
         if (state is UserLoadingState) {
           debugPrint('SignUp in progress...');
-        }
-        else if (state is UserSignUpSuccessState) {
+        } else if (state is UserSignUpSuccessState) {
           debugPrint('SignUp successful for user: ${state.user.email}');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Sign up successful! Please login.')),
           );
           Navigator.pushReplacementNamed(context, '/signin-screen');
-        }
-        else if (state is UserFailureState) {
+        } else if (state is UserFailureState) {
           debugPrint('SignUp failed: ${state.failure}');
           debugPrint('Stack trace: ${state.failure}');
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -147,10 +143,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   // Title
                   const Text(
                     "Create your account",
-                    style: TextStyle(
-                      fontSize: 27,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 27, fontWeight: FontWeight.w600),
                   ),
 
                   const SizedBox(height: 20),
@@ -163,7 +156,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Name',
                           hintText: 'ex: john smith',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+                          labelStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
                         ),
+
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             debugPrint('Name field empty');
@@ -180,6 +186,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Email',
                           hintText: 'ex: john@example.com',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+
+                          labelStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
                         ),
                         validator: _validateEmail,
                         keyboardType: TextInputType.emailAddress,
@@ -192,6 +211,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Password',
                           hintText: 'Enter your password',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+                          labelStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
                         ),
                         obscureText: true,
                         validator: _validatePassword,
@@ -204,6 +235,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Confirm Password',
                           hintText: 'Confirm your password',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          border: InputBorder.none,
+                          labelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
                         ),
                         obscureText: true,
                         validator: _validateConfirmPassword,
@@ -235,14 +278,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   // Submit button
                   BlocBuilder<UserBloc, UserState>(
                     builder: (context, state) {
-                      return ElevatedButton(
-                        onPressed: state is UserLoadingState ? null : _handleSignUp,
-                        child: state is UserLoadingState
-                            ? const CircularProgressIndicator()
-                            : const Text('SIGN UP'),
+                      return SizedBox(
+                        width: 280,
+                        height: 40,
+                        child: ElevatedButton(
+                          onPressed: state is UserLoadingState
+                              ? null
+                              : _handleSignUp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: state is UserLoadingState
+                              ? const CircularProgressIndicator()
+                              : const Text(
+                                  'SIGN UP',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                        ),
                       );
                     },
                   ),
+
+                  const SizedBox(height: 60),
 
                   // Sign in link
                   TextButton(

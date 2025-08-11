@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   gradient: LinearGradient(
                     colors: [
                       Color.fromRGBO(63, 81, 243, 0.5),
-                      Color.fromRGBO(63, 81, 243, 1),
+                      Theme.of(context).colorScheme.primary,
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -51,7 +51,6 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  
                   LogoWidget(),
 
                   Center(
@@ -82,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: Text(
                     'Start',
                     style: TextStyle(
-                      color: const Color.fromRGBO(63, 81, 243, 1),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),

@@ -7,7 +7,7 @@ class LogoWidget extends StatelessWidget {
 
   const LogoWidget({
     super.key,
-    this.fontSize = 117,
+    this.fontSize = 127,
     this.hsize = 140,
     this.wsize = 340,
   });
@@ -19,7 +19,10 @@ class LogoWidget extends StatelessWidget {
       height: hsize,
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        border: Border.all(width: 1, color: Colors.blue),
+        border: Border.all(
+          width: 1,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         color: Colors.white,
         borderRadius: BorderRadius.circular(
           hsize / 4.5,
@@ -31,9 +34,10 @@ class LogoWidget extends StatelessWidget {
           'ECOM',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Color.fromRGBO(63, 81, 243, 1),
+            color: Theme.of(context).colorScheme.primary,
             fontSize: fontSize,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w900,
+            fontFamily: Theme.of(context).textTheme.displaySmall?.fontFamily,
           ),
         ),
       ),

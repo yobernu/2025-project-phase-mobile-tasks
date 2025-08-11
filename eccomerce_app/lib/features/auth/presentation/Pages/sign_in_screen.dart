@@ -32,10 +32,12 @@ class _SignInScreenState extends State<SignInScreen> {
       final password = passwordController.text;
 
       if (email.isEmpty || password.isEmpty) {
-        dev.log('[SIGN-IN] Missing fields: email="$email", password="$password"');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill all fields')),
+        dev.log(
+          '[SIGN-IN] Missing fields: email="$email", password="$password"',
         );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Please fill all fields')));
         return;
       }
 
@@ -46,9 +48,9 @@ class _SignInScreenState extends State<SignInScreen> {
     } catch (e, stack) {
       dev.log('[SIGN-IN] Error dispatching login event: $e');
       dev.log('[STACK] $stack');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error occurred')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unexpected error occurred')));
     }
   }
 
@@ -60,14 +62,18 @@ class _SignInScreenState extends State<SignInScreen> {
 
         if (state is UserLogInSuccessState) {
           dev.log('[SIGN-IN] Login successful for user: ${state.user.email}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign in successful!')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Sign in successful!')));
           Navigator.pushReplacementNamed(context, '/home-screen');
         } else if (state is UserFailureState) {
           dev.log('[SIGN-IN] Login failed: ${state.failure}');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign-in failed: ${state.failure.message ?? state.failure.toString()}')),
+            SnackBar(
+              content: Text(
+                'Sign-in failed: ${state.failure.message ?? state.failure.toString()}',
+              ),
+            ),
           );
         }
       },
@@ -78,23 +84,14 @@ class _SignInScreenState extends State<SignInScreen> {
             children: [
               // Header
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 35, 0, 55),
-                child: Row(
-                  children: <Widget>[
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(Icons.arrow_back),
-                    ),
-                    Spacer(),
-                    LogoWidget(fontSize: 18, wsize: 100, hsize: 40),
-                  ],
-                ),
+                padding: EdgeInsets.fromLTRB(0, 65, 0, 55),
+                child: LogoWidget(fontSize: 38, wsize: 200, hsize: 60),
               ),
 
               Text(
                 "Sign in to your account",
                 style: TextStyle(
-                  fontSize: 27,
+                  fontSize: 24,
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
                 ),
@@ -125,7 +122,9 @@ class _SignInScreenState extends State<SignInScreen> {
                   dev.log('[SIGN-IN] BlocBuilder rendering with state: $state');
                   return SubmitButton(
                     onPress: state is UserLoadingState ? null : _handleSignIn,
-                    title: state is UserLoadingState ? 'SIGNING IN...' : 'SIGN-IN',
+                    title: state is UserLoadingState
+                        ? 'SIGNING IN...'
+                        : 'SIGN-IN',
                   );
                 },
               ),
@@ -143,7 +142,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     },
                     child: Text(
                       "SIGN-UP",
-                      style: TextStyle(color: Color.fromRGBO(63, 81, 243, 1)),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ],
