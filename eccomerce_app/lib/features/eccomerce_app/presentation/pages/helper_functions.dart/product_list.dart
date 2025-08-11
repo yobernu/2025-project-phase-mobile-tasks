@@ -72,6 +72,7 @@ class ProductList extends StatelessWidget {
           ),
           GridView.builder(
             shrinkWrap: true,
+            // physics: const AlwaysScrollableScrollPhysics(),
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -85,6 +86,8 @@ class ProductList extends StatelessWidget {
               return _buildProductCard(products[index], context);
             },
           ),
+
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.all(8),
             child: TextButton(
@@ -128,23 +131,17 @@ class ProductList extends StatelessWidget {
   Widget _buildProductCard(Product product, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate to product details page
-        Navigator.pushNamed(
-              context,
-              '/product-details',
-              arguments: product,
-            );
+        Navigator.pushNamed(context, '/product-details', arguments: product);
       },
       child: Card(
-        elevation: 4,
+        elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
-          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // product image
             Container(
-              height: 200,
+              height: 280,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.vertical(
@@ -197,59 +194,69 @@ class ProductList extends StatelessWidget {
             ),
             //padding below image
             const SizedBox(height: 20),
-
-            SizedBox(
-              height: 80,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                        product.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.amber
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      product.subtitle ?? 'subtitle',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '\$${product.price}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                            fontSize: 12,
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.0, 0, 8, 0),
+              child: SizedBox(
+                height: 80,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 0, 8, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              size: 12,
-                              color: Colors.amber,
+                          const SizedBox(height: 4),
+                          Text(
+                            product.subtitle ?? 'subtitle',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
                             ),
-                            Text(
-                              product.rating ?? '4.0',
-                              style: const TextStyle(fontSize: 10),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                      ),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '\$${product.price}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              fontSize: 16,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                          ),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                size: 16,
+                                color: Colors.amber,
+                              ),
+                              Text(
+                                product.rating ?? '4.0',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

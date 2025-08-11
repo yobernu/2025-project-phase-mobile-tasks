@@ -67,23 +67,6 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, void>> signOut({required String id}) async {
-    final isConnected = await networkInfo.isConnected;
-
-    if (!isConnected) {
-      return Left(NetworkFailure('No internet connection'));
-    }
-
-    try {
-      await remote.logout(id);
-      await local.clearUser();
-      return const Right(null);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
-  @override
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
       final user = await local.getCachedUser();
@@ -105,26 +88,6 @@ class UserRepositoryImpl implements UserRepository {
       return Right(isValid);
     } catch (e) {
       return Left(CacheFailure('Failed to check authentication status'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, String>> refreshToken() async {
-    if (!await networkInfo.isConnected) {
-      return Left(ServerFailure('No internet connection'));
-    }
-
-    try {
-      final refreshToken = await local.getRefreshToken();
-      if (refreshToken == null || refreshToken.isEmpty) {
-        return Left(CacheFailure('No refresh token available'));
-      }
-
-      final newToken = await remote.refreshToken(refreshToken);
-      await local.saveAccessToken(newToken);
-      return Right(newToken);
-    } catch (e) {
-      return Left(ServerFailure('Failed to refresh token'));
     }
   }
 }

@@ -3,8 +3,13 @@ import 'package:ecommerce_app/features/auth/presentation/Pages/sign_up_screen.da
 import 'package:ecommerce_app/features/auth/presentation/Pages/splash_screen.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_state.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/create_screen.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/home_screen.dart'
     as ecommerce;
+import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/details_screen.dart'
+    as ecommerce;
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/updates_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -33,6 +38,29 @@ class AppRouter {
             child: const ecommerce.HomeScreen(),
           ),
         );
+      case '/product-details':
+        final product = settings.arguments as Product;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => di<ProductBloc>(),
+            child: ecommerce.DetailsScreen(product: product),
+          ),
+        );
+      case '/create-product':
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => di<ProductBloc>(),
+            child: CreateScreen(),
+          ),
+        );
+      case '/product-updates':
+        final product = settings.arguments as Product;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => di<ProductBloc>(),
+            child: UpdatesScreen(product: product),
+          ),
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
@@ -57,3 +85,4 @@ class AppRouter {
     return '/';
   }
 }
+// in-app navigation

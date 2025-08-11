@@ -1,36 +1,40 @@
 import 'dart:convert';
 import 'dart:developer' as dev;
 import 'dart:io';
-import 'package:dartz/dartz.dart';
+import 'dart:async';
+import 'package:ecommerce_app/core/services/auth_services.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:ecommerce_app/core/constants/api_constants.dart';
 import 'package:ecommerce_app/core/errors/exceptions.dart';
-import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/models/product_model.dart';
 import '../../domain/entities/product.dart';
 
 abstract class ProductRemoteDataSources {
-  /// Get all products from remote source
   Future<List<ProductModel>> getAllProducts();
-
-  /// Get a specific product by ID from remote source
   Future<ProductModel> getProductById(String id);
-
-  /// Create a new product in remote source
   Future<ProductModel> createProduct(Product product);
-
-  /// Update an existing product in remote source
   Future<ProductModel> updateProduct(Product product);
-
-  /// Delete a product by ID from remote source
   Future<void> deleteProduct(String id);
 }
 
 class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
   final http.Client client;
+  final AuthService authService;
   static const String _tag = 'ProductRemoteDS';
 
-  ProductRemoteDataSourcesImpl({required this.client});
+  ProductRemoteDataSourcesImpl({
+    required this.client,
+    required this.authService,
+  });
+
+  Map<String, String> _buildHeaders() {
+    final token = authService.getToken();
+    return {
+      HttpHeaders.contentTypeHeader: 'application/json',
+      if (token != null) HttpHeaders.authorizationHeader: 'Bearer $token',
+    };
+  }
 
   @override
   Future<List<ProductModel>> getAllProducts() async {
@@ -41,7 +45,7 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
       dev.log('Requesting products from: $uri', name: _tag);
 
       final response = await client
-          .get(uri, headers: ApiConstants.headers)
+          .get(uri, headers: _buildHeaders())
           .timeout(const Duration(seconds: 15));
 
       _logResponse(response);
@@ -54,10 +58,8 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
         throw _handleStatusCode(response.statusCode, response.body);
       }
     } on SocketException {
-      dev.log('No internet connection', name: _tag);
       throw NetworkException('No internet connection');
     } on TimeoutException {
-      dev.log('Request timeout', name: _tag);
       throw NetworkException('Request timeout');
     } catch (e) {
       dev.log('Unexpected error: $e', name: _tag, error: e);
@@ -74,7 +76,7 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
       dev.log('Requesting product #$id from: $uri', name: _tag);
 
       final response = await client
-          .get(uri, headers: ApiConstants.headers)
+          .get(uri, headers: _buildHeaders())
           .timeout(const Duration(seconds: 15));
 
       _logResponse(response);
@@ -100,14 +102,48 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
       final uri = Uri.parse(
         '${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}',
       );
-      final body = json.encode(product.toJson());
 
       dev.log('Creating product at: $uri', name: _tag);
-      dev.log('Request body: $body', name: _tag);
 
-      final response = await client
-          .post(uri, headers: ApiConstants.headers, body: body)
-          .timeout(const Duration(seconds: 15));
+      // Create multipart request
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers including auth token
+      final headers = _buildHeaders();
+      headers.remove(HttpHeaders.contentTypeHeader); // Remove JSON content-type
+      request.headers.addAll(headers);
+
+      // Add text fields
+      request.fields['name'] = product.name;
+      request.fields['description'] = product.description;
+      request.fields['price'] = product.price;
+      if (product.subtitle != null)
+        request.fields['subtitle'] = product.subtitle!;
+      if (product.rating != null) request.fields['rating'] = product.rating!;
+      if (product.sizes != null && product.sizes!.isNotEmpty) {
+        request.fields['sizes'] = product.sizes!.join(',');
+      }
+
+      // Add image file
+      final imageFile = File(product.imageUrl);
+      if (await imageFile.exists()) {
+        final stream = http.ByteStream(imageFile.openRead());
+        final length = await imageFile.length();
+        final multipartFile = http.MultipartFile(
+          'image',
+          stream,
+          length,
+          filename: product.imageUrl.split('/').last,
+          contentType: MediaType('image', '*'),
+        );
+        request.files.add(multipartFile);
+      } else {
+        throw ServerException('Image file not found');
+      }
+
+      // Send request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       _logResponse(response);
 
@@ -138,7 +174,7 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
       dev.log('Request body: $body', name: _tag);
 
       final response = await client
-          .put(uri, headers: ApiConstants.headers, body: body)
+          .put(uri, headers: _buildHeaders(), body: body)
           .timeout(const Duration(seconds: 15));
 
       _logResponse(response);
@@ -159,7 +195,7 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
   }
 
   @override
-  Future<Either<Failure, void>> deleteProduct(String id) async {
+  Future<void> deleteProduct(String id) async {
     try {
       final uri = Uri.parse(
         '${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}/$id',
@@ -167,29 +203,24 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
       dev.log('Deleting product #$id at: $uri', name: _tag);
 
       final response = await client
-          .delete(uri, headers: ApiConstants.headers)
+          .delete(uri, headers: _buildHeaders())
           .timeout(const Duration(seconds: 15));
 
       _logResponse(response);
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        return const Right(null);
-      } else {
-        return Left(
-          ServerFailure('Failed to delete product (${response.statusCode})'),
-        );
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw _handleStatusCode(response.statusCode, response.body);
       }
     } on SocketException {
-      return Left(NetworkFailure('No internet connection'));
+      throw NetworkException('No internet connection');
     } on TimeoutException {
-      return Left(NetworkFailure('Request timeout'));
+      throw NetworkException('Request timeout');
     } catch (e) {
       dev.log('Error deleting product #$id: $e', name: _tag, error: e);
-      return Left(ServerFailure('Failed to delete product'));
+      rethrow;
     }
   }
 
-  // Helper methods
   void _logResponse(http.Response response) {
     dev.log('Response status: ${response.statusCode}', name: _tag);
     dev.log('Response body: ${response.body}', name: _tag);

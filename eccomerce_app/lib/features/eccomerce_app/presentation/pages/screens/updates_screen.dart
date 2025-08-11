@@ -33,11 +33,15 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
     super.initState();
     titleController = TextEditingController(text: widget.product.name);
     subtitleController = TextEditingController(text: widget.product.subtitle);
-    priceController = TextEditingController(text: widget.product.price.toString());
-    descriptionController = TextEditingController(text: widget.product.description);
+    priceController = TextEditingController(
+      text: widget.product.price.toString(),
+    );
+    descriptionController = TextEditingController(
+      text: widget.product.description,
+    );
     ratingController = TextEditingController(text: widget.product.rating);
     sizeController = TextEditingController(
-      text: widget.product.sizes?.join(', ') ?? ''
+      text: widget.product.sizes?.join(', ') ?? '',
     );
   }
 
@@ -54,14 +58,18 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile != null) {
       setState(() => _isLoading = true);
       try {
         final Directory appDir = await getApplicationDocumentsDirectory();
         final String fileName = p.basename(pickedFile.path);
-        final File savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+        final File savedImage = await File(
+          pickedFile.path,
+        ).copy('${appDir.path}/$fileName');
         setState(() {
           _imageFile = savedImage;
           _isLoading = false;
@@ -84,7 +92,7 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
         imageUrl: _imageFile?.path ?? widget.product.imageUrl,
         name: titleController.text.trim(),
         subtitle: subtitleController.text.trim(),
-        price: double.tryParse(priceController.text.trim()) ?? 0.0,
+        price: priceController.text.trim(),
         rating: ratingController.text.trim(),
         sizes: sizeController.text.isNotEmpty
             ? sizeController.text.split(',').map((s) => s.trim()).toList()
@@ -112,10 +120,7 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -133,10 +138,10 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
     try {
       context.read<ProductBloc>().add(DeleteProductEvent(widget.product.id));
       if (!mounted) return;
-      
+
       Navigator.pop(context); // Close loading
       Navigator.pop(context); // Go back
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Product deleted successfully'),
@@ -152,9 +157,9 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
 
   void _showSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _buildImageWidget() {
@@ -192,7 +197,7 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
               child: CircularProgressIndicator(
                 value: loadingProgress.expectedTotalBytes != null
                     ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
+                          loadingProgress.expectedTotalBytes!
                     : null,
               ),
             );
@@ -233,10 +238,7 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
         children: <Widget>[
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -331,7 +333,9 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
                         'Price',
                         priceController,
                         prefixIcon: Icons.attach_money,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         isPrice: true,
                       ),
                       _buildFormField(
@@ -342,7 +346,9 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
                       _buildFormField(
                         'Rating',
                         ratingController,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                       ),
                       _buildFormField(
                         'Description',

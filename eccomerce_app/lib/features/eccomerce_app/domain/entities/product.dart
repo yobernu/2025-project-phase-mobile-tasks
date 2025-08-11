@@ -5,10 +5,10 @@ class Product extends Equatable {
   final String id;
   final String name;
   final String description;
-  final double price;
+  final String price;
   final String imageUrl;
-  final String? subtitle;  // Make nullable if not always present
-  final String? rating;    // Make nullable
+  final String? subtitle; // Make nullable if not always present
+  final String? rating; // Make nullable
   final List<String>? sizes; // Make nullable
 
   const Product({
@@ -22,17 +22,16 @@ class Product extends Equatable {
     this.sizes = const [],
   });
 
-
-    factory Product.fromJson(Map<String, dynamic> json) {
+  factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'].toString(),
       name: json['name']?.toString() ?? 'No Name',
       description: json['description']?.toString() ?? 'No Description',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      price: (json['price'] as num?)?.toString() ?? '0.0',
       imageUrl: json['imageUrl']?.toString() ?? '',
       subtitle: json['subtitle']?.toString(),
       rating: json['rating']?.toString(),
-      sizes: json['sizes'] != null 
+      sizes: json['sizes'] != null
           ? (json['sizes'] as List).map((e) => e.toString()).toList()
           : null,
     );
@@ -53,13 +52,13 @@ class Product extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        price,
-        imageUrl,
-        subtitle,
-        rating,
-        sizes,
-      ];
+    id,
+    name,
+    description,
+    price,
+    imageUrl,
+    subtitle,
+    rating,
+    sizes,
+  ];
 }

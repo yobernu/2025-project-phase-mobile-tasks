@@ -1,4 +1,5 @@
 // dependency_injection.dart
+import 'package:ecommerce_app/core/services/auth_services.dart';
 import 'package:ecommerce_app/features/auth/data/datasource/auth_local_data_sources.dart';
 import 'package:ecommerce_app/features/auth/data/datasource/auth_remote_data_sources.dart';
 import 'package:ecommerce_app/features/auth/data/repositories/repository.dart';
@@ -6,8 +7,6 @@ import 'package:ecommerce_app/features/auth/domain/repositories/auth_repositorie
 import 'package:ecommerce_app/features/auth/domain/usecases/check_out_status_usecase.dart';
 import 'package:ecommerce_app/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:ecommerce_app/features/auth/domain/usecases/login_usecase.dart';
-import 'package:ecommerce_app/features/auth/domain/usecases/refreash_token_usecase.dart';
-import 'package:ecommerce_app/features/auth/domain/usecases/signout_usecase.dart';
 import 'package:ecommerce_app/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_local_data_sources.dart';
@@ -41,6 +40,8 @@ Future<void> init() async {
   sl.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoImpl(internetConnectionChecker: sl()),
   );
+  // Core
+  sl.registerLazySingleton<AuthService>(() => AuthService(prefs: sl()));
 
   //! External
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -53,7 +54,7 @@ Future<void> init() async {
   //! Features - Auth
   // Data sources
   sl.registerLazySingleton<RemoteAuthDataSource>(
-    () => RemoteAuthDataSourceImpl(client: sl()),
+    () => RemoteAuthDataSourceImpl(authService: sl(), client: sl()),
   );
   sl.registerLazySingleton<LocalAuthDataSource>(
     () => LocalAuthDataSourceImpl(prefs: sl()),
@@ -67,20 +68,16 @@ Future<void> init() async {
   // Use cases
   sl.registerLazySingleton(() => SignUpUseCase(sl()));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
-  sl.registerLazySingleton(() => SignOutUseCase(sl()));
   sl.registerLazySingleton(() => CheckAuthStatusUseCase(sl()));
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
-  sl.registerLazySingleton(() => RefreshTokenUseCase(sl()));
 
   // Bloc
   sl.registerFactory(
     () => UserBloc(
       signUpUseCase: sl(),
       loginUseCase: sl(),
-      signOutUseCase: sl(),
       checkAuthStatusUseCase: sl(),
       getCurrentUserUseCase: sl(),
-      refreshTokenUseCase: sl(),
       connectionChecker: sl(),
     ),
   );
@@ -88,7 +85,7 @@ Future<void> init() async {
   //! Features - Ecommerce
   // Data sources
   sl.registerLazySingleton<ProductRemoteDataSources>(
-    () => ProductRemoteDataSourcesImpl(client: sl()),
+    () => ProductRemoteDataSourcesImpl(authService: sl(), client: sl()),
   );
   sl.registerLazySingleton<ProductLocalDataSources>(
     () => ProductLocalDataSourcesImpl(sharedPreferences: sl()),

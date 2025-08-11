@@ -15,17 +15,21 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load products when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductBloc>().add(const LoadAllProductsEvent());
     });
   }
 
+  Future<void> _refreshProducts() async {
+    context.read<ProductBloc>().add(const LoadAllProductsEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
+    _refreshProducts();
     return Container(
       padding: const EdgeInsets.all(16),
-      color: const Color.fromARGB(255, 255, 255, 255),
+      color: Colors.white,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -57,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       text: 'Hello, ',
                       style: const TextStyle(color: Colors.black),
                       children: <InlineSpan>[
-                         TextSpan(
+                        TextSpan(
                           text: 'Yohannes, ',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
@@ -75,7 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color.fromRGBO(221, 221, 221, 1)),
+                border: Border.all(
+                  color: const Color.fromRGBO(221, 221, 221, 1),
+                ),
               ),
               child: const Icon(
                 Icons.notifications_none,
@@ -86,17 +92,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           bottom: const PreferredSize(
             preferredSize: Size.fromHeight(20),
-            child: SizedBox(
-              height: 20,
-            ),
+            child: SizedBox(height: 20),
           ),
         ),
-        body: const ProductList(),
+        body: RefreshIndicator(
+          onRefresh: _refreshProducts,
+          child: const ProductList(),
+        ),
       ),
     );
   }
-
-
 }
-
-// bloc

@@ -98,31 +98,24 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     Emitter<ProductState> emit,
   ) async {
     emit(const LoadingState());
-    final inputEither = inputConverter.stringToUnsignedInteger(event.productId);
-    await inputEither.fold(
+
+    final result = await deleteProductUsecase.call(
+      DeleteProductParams(event.productId), // 👈 Use directly
+    );
+
+    await result.fold(
       (failure) async {
         emit(ErrorState(_mapFailureToMessage(failure)));
       },
-      (integer) async {
-        final result = await deleteProductUsecase.call(
-          DeleteProductParams(integer.toString()),
+      (_) async {
+        final productsResult = await getAllProductsUsecase.call(
+          const GetAllProductsParams(),
         );
-        await result.fold(
-          (failure) async {
-            emit(ErrorState(_mapFailureToMessage(failure)));
-          },
-          (_) async {
-            // After successful deletion, reload all products
-            final productsResult = await getAllProductsUsecase.call(
-              const GetAllProductsParams(),
-            );
-            emit(
-              productsResult.fold(
-                (failure) => ErrorState(_mapFailureToMessage(failure)),
-                (products) => LoadedAllProductsState(products),
-              ),
-            );
-          },
+        emit(
+          productsResult.fold(
+            (failure) => ErrorState(_mapFailureToMessage(failure)),
+            (products) => LoadedAllProductsState(products),
+          ),
         );
       },
     );
@@ -133,14 +126,25 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     Emitter<ProductState> emit,
   ) async {
     emit(const LoadingState());
-    final result = await createProductUsecase.call(
+    final createResult = await createProductUsecase.call(
       InsertProductParams(event.product),
     );
-    emit(
-      result.fold(
-        (failure) => ErrorState(_mapFailureToMessage(failure)),
-        (_) => const LoadedAllProductsState([]),
-      ),
+
+    await createResult.fold(
+      (failure) async {
+        emit(ErrorState(_mapFailureToMessage(failure)));
+      },
+      (_) async {
+        final productsResult = await getAllProductsUsecase.call(
+          const GetAllProductsParams(),
+        );
+        emit(
+          productsResult.fold(
+            (failure) => ErrorState(_mapFailureToMessage(failure)),
+            (products) => LoadedAllProductsState(products),
+          ),
+        );
+      },
     );
   }
 

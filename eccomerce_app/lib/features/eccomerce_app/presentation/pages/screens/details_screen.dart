@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:ecommerce_app/features/eccomerce_app/domain/entities/product.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Widget _buildImage() {
     final imageUrl = widget.product.imageUrl;
-    
+
     if (imageUrl.isEmpty) {
       return const Icon(Icons.image, size: 50, color: Colors.grey);
     }
@@ -41,7 +42,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
+                        loadingProgress.expectedTotalBytes!
                   : null,
             ),
           );
@@ -59,7 +60,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Widget _buildSizeSelector() {
     final sizes = widget.product.sizes;
-    
+
     if (sizes == null || sizes.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -69,10 +70,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       children: [
         const Text(
           'Size:',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 20,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -122,10 +120,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
   Widget build(BuildContext context) {
     return BlocListener<ProductBloc, ProductState>(
       listener: (context, state) {
+        debugPrint('🔄 ProductBloc state changed: ${state.runtimeType}');
+
         if (state is ErrorState) {
+          debugPrint('❌ ErrorState: ${state.message}');
           showError(state.message);
+        } else if (state is LoadedAllProductsState) {
+          debugPrint('✅ Product deleted successfully. Navigating back...');
+          Navigator.pop(context); // Close loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Product deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context); // Go back to previous screen
         }
       },
+
       child: Scaffold(
         backgroundColor: const Color(0xFFFFFFFF),
         body: SafeArea(
@@ -136,7 +148,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   alignment: Alignment.topLeft,
                   children: <Widget>[
                     SizedBox(
-                      height: 280,
+                      height: 360,
                       width: double.infinity,
                       child: ClipRRect(
                         borderRadius: const BorderRadius.only(
@@ -170,7 +182,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.fromLTRB(36, 24, 36, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -186,21 +198,23 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             ),
                           ),
                           const Spacer(),
-                          if (widget.product.rating != null)
-                            Row(
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.star,
-                                  color: Color.fromARGB(255, 255, 215, 1),
-                                  size: 20,
-                                ),
-                                Text('(${widget.product.rating})'),
-                              ],
-                            ),
+                          // if (widget.product.rating != null)
+                          Row(
+                            children: <Widget>[
+                              const Icon(
+                                Icons.star,
+                                color: Color.fromARGB(255, 255, 215, 1),
+                                size: 20,
+                              ),
+                              // widget.product.rating.toString() ??
+                              const Text('4.0'),
+                            ],
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Flexible(
                             child: Text(
@@ -212,12 +226,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               ),
                             ),
                           ),
+                          const Spacer(),
                           Text(
-                            '\$${widget.product.price.toStringAsFixed(2)}',
+                            '\$${widget.product.price.toString()}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w500,
-                              fontSize: 16),
+                              fontSize: 16,
                             ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -235,7 +251,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 44,
-                                vertical: 12),
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -257,10 +274,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           TextButton(
                             onPressed: () => _navigateToUpdate(context),
                             style: TextButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(63, 81, 243, 1),
+                              backgroundColor: const Color.fromRGBO(
+                                63,
+                                81,
+                                243,
+                                1,
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 44,
-                                vertical: 12),
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -287,53 +310,89 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
+  Future<bool> _confirmDeleteDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Delete Product'),
+              content: const Text('Are you sure you want to delete this product?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('CANCEL'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                  child: const Text('DELETE'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  Future<bool> _handleProductDeletion(ProductBloc productBloc, String productId) async {
+    final completer = Completer<bool>();
+    late final StreamSubscription subscription;
+
+    subscription = productBloc.stream.listen((state) {
+      if (state is LoadedAllProductsState) {
+        if (!completer.isCompleted) {
+          subscription.cancel();
+          completer.complete(true);
+        }
+      } else if (state is ErrorState) {
+        if (!completer.isCompleted) {
+          subscription.cancel();
+          completer.complete(false);
+        }
+      }
+    });
+
+    // Start the delete operation
+    productBloc.add(DeleteProductEvent(productId));
+
+    return completer.future;
+  }
+
   Future<void> _confirmDelete(BuildContext context) async {
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Product'),
-        content: const Text('Are you sure you want to delete this product?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+    final shouldDelete = await _confirmDeleteDialog();
+    if (!shouldDelete || !mounted) return;
 
-    if (shouldDelete != true) return;
-
-    if (!mounted) return;
+    final productBloc = context.read<ProductBloc>();
+    
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (BuildContext context) {
+        return const Center(child: CircularProgressIndicator());
+      },
     );
 
     try {
-      context.read<ProductBloc>().add(
-        DeleteProductEvent(widget.product.id),
-      );
-
+      final success = await _handleProductDeletion(productBloc, widget.product.id);
+      
       if (!mounted) return;
-      Navigator.pop(context); // Close loading
+      Navigator.pop(context); // Close loading dialog
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Product deleted successfully'),
-          backgroundColor: Colors.green),
-      );
-
-      Navigator.pop(context); // Go back
+      if (success) {
+        if (mounted) {
+          Navigator.pop(context); // Go back to previous screen
+        }
+      } else {
+        showError('Failed to delete product');
+      }
     } catch (e) {
-      if (!mounted) return;
-      Navigator.pop(context); // Close loading
-      showError('Failed to delete: $e');
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        showError('An error occurred: $e');
+      }
     }
   }
 
@@ -346,3 +405,4 @@ class _DetailsScreenState extends State<DetailsScreen> {
     if (mounted) setState(() {}); // Refresh if updated
   }
 }
+// Bloclistener

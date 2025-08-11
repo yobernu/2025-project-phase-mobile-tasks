@@ -14,12 +14,6 @@ abstract class UserRepository {
     required String password,
   });
 
-  Future<Either<Failure, void>> signOut({
-    required String id,
-  });
-
   Future<Either<Failure, User>> getCurrentUser();
   Future<Either<Failure, bool>> isAuthenticated();
-
-  Future<Either<Failure, String>> refreshToken();
 }
