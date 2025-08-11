@@ -1,7 +1,6 @@
 import 'injection_container.dart' as di;
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'presentation/pages/home_screen.dart';
-
 
 void main() async {
   await di.init();
@@ -15,13 +14,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Ecommerce App',
-      theme: ThemeData(
-        primaryColor: Colors.blue,
-        fontFamily: 'Poppins',
-      ),
+      theme: ThemeData(primaryColor: Colors.blue, fontFamily: 'Poppins'),
       home: HomeScreen(),
     );
   }
 }
-
-

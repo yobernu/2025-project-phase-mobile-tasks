@@ -137,7 +137,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _initiateNewChat(String userId) {
     // Show loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
       const SnackBar(
         content: Row(
           children: [
@@ -156,6 +157,16 @@ class _ChatScreenState extends State<ChatScreen> {
         duration: Duration(seconds: 2),
       ),
     );
+
+    // Add a listener to handle the error state
+    context.read<ChatBloc>().stream.listen((state) {
+      if (state is ChatError) {
+        scaffold.hideCurrentSnackBar();
+        scaffold.showSnackBar(
+          SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+        );
+      }
+    });
 
     // Trigger the initiate chat event
     context.read<ChatBloc>().add(InitiateNewChat(userId));

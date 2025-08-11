@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'package:http/http.dart' as http;
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
@@ -18,15 +19,16 @@ abstract class ChatRemoteDataSource {
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   final http.Client client;
-  final String baseUrl = 'https://g5-flutter-learning-path-be-tvum.onrender.com/api/v3';
+  final String baseUrl =
+      'https://g5-flutter-learning-path-be-tvum.onrender.com/api/v3';
 
   ChatRemoteDataSourceImpl({required this.client});
 
   Map<String, String> get _headers => {
-        'Content-Type': 'application/json',
-        // Add authorization header when available
-        // 'Authorization': 'Bearer $token',
-      };
+    'Content-Type': 'application/json',
+    // Add authorization header when available
+    // 'Authorization': 'Bearer $token',
+  };
 
   @override
   Future<List<ChatModel>> getChats() async {
@@ -69,7 +71,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       final List<dynamic> messagesJson = jsonResponse['data'];
-      return messagesJson.map((message) => MessageModel.fromJson(message)).toList();
+      return messagesJson
+          .map((message) => MessageModel.fromJson(message))
+          .toList();
     } else {
       throw Exception('Failed to get chat messages');
     }
@@ -83,11 +87,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       body: json.encode({'userId': userId}),
     );
 
+    dev.log('Initiate chat response status: ${response.statusCode}');
+    dev.log('Response body: ${response.body}');
+
     if (response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       return ChatModel.fromJson(jsonResponse['data']);
     } else {
-      throw Exception('Failed to initiate chat');
+      throw Exception('Failed to initiate chat: ${response.body}');
     }
   }
 
@@ -112,10 +119,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     final response = await client.post(
       Uri.parse('$baseUrl/chats/$chatId/messages'),
       headers: _headers,
-      body: json.encode({
-        'content': content,
-        'type': type,
-      }),
+      body: json.encode({'content': content, 'type': type}),
     );
 
     if (response.statusCode == 201) {
