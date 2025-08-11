@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 
 class FormInput extends StatelessWidget {
@@ -8,12 +7,12 @@ class FormInput extends StatelessWidget {
   final bool isPassword;
 
   const FormInput({
-    Key? key, 
-    required this.title, 
+    super.key,
+    required this.title,
     required this.placeholder,
     this.controller,
     this.isPassword = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +22,10 @@ class FormInput extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontWeight: FontWeight.bold, 
+            fontWeight: FontWeight.bold,
             fontSize: 16,
             letterSpacing: 0.02,
-            color: Color.fromRGBO(111,111,111,1)
-            
+            color: Color.fromRGBO(111, 111, 111, 1),
           ),
         ),
         SizedBox(height: 8),
@@ -40,7 +38,7 @@ class FormInput extends StatelessWidget {
               color: Color.fromRGBO(136, 136, 136, 1),
               fontSize: 15,
               fontWeight: FontWeight.w400,
-              letterSpacing: 0.02
+              letterSpacing: 0.02,
               // fontFamily: Poppins
             ),
             border: InputBorder.none,
