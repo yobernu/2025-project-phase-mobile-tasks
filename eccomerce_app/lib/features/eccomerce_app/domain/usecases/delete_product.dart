@@ -6,7 +6,7 @@ import '../repositories/product_repository.dart';
 class DeleteProductParams extends Params {
   final String id;
   const DeleteProductParams(this.id);
-  
+
   @override
   List<Object?> get props => [id];
 }

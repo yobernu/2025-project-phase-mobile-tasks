@@ -9,6 +9,18 @@ import 'package:ecommerce_app/features/auth/domain/usecases/get_current_user_use
 import 'package:ecommerce_app/features/auth/domain/usecases/login_usecase.dart';
 import 'package:ecommerce_app/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:ecommerce_app/features/auth/presentation/provider/user_bloc.dart';
+import 'package:ecommerce_app/features/chat/data/datasources/chat_local_data_source.dart';
+import 'package:ecommerce_app/features/chat/data/datasources/chat_remote_data_source.dart';
+import 'package:ecommerce_app/features/chat/data/repositories/chat_repository_impl.dart';
+import 'package:ecommerce_app/features/chat/domain/repositories/chat_repository.dart';
+import 'package:ecommerce_app/features/chat/domain/usecases/delete_chat.dart';
+import 'package:ecommerce_app/features/chat/data/services/socket_service.dart';
+import 'package:ecommerce_app/features/chat/domain/usecases/get_chat_by_id.dart';
+import 'package:ecommerce_app/features/chat/domain/usecases/get_chat_messages.dart';
+import 'package:ecommerce_app/features/chat/domain/usecases/get_chats.dart';
+import 'package:ecommerce_app/features/chat/domain/usecases/initiate_chat.dart';
+import 'package:ecommerce_app/features/chat/domain/usecases/send_message.dart';
+import 'package:ecommerce_app/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_local_data_sources.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/datasources/product_remote_data_sources.dart';
 import 'package:ecommerce_app/features/eccomerce_app/data/repositories/product_repository_impl.dart';
@@ -46,6 +58,10 @@ Future<void> init() async {
   //! External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
+  
+  // Socket Service
+  sl.registerLazySingleton<SocketService>(() => SocketService.instance);
+
   sl.registerLazySingleton(() => http.Client());
   sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
   sl.registerLazySingleton(() => ImagePicker());
@@ -116,6 +132,50 @@ Future<void> init() async {
       deleteProductUsecase: sl(),
       createProductUsecase: sl(),
       inputConverter: sl(),
+    ),
+  );
+
+  //! Features - Chat
+  // Data sources
+  sl.registerLazySingleton<ChatRemoteDataSource>(
+    () => ChatRemoteDataSourceImpl(
+      client: sl(),
+      authService: sl(), // If you need authentication
+    ),
+  );
+
+  sl.registerLazySingleton<ChatLocalDataSource>(
+    () => ChatLocalDataSourceImpl(sharedPreferences: sl()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<ChatRepository>(
+    () => ChatRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      networkInfo: sl(),
+      socketService: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetChats(sl()));
+  sl.registerLazySingleton(() => GetChatById(sl()));
+  sl.registerLazySingleton(() => GetChatMessages(sl()));
+  sl.registerLazySingleton(() => InitiateChat(sl()));
+  sl.registerLazySingleton(() => DeleteChat(sl()));
+  sl.registerLazySingleton(() => SendMessage(sl()));
+
+  // Bloc
+  sl.registerFactory(
+    () => ChatBloc(
+      getChats: sl(),
+      getChatById: sl(),
+      getChatMessages: sl(),
+      initiateChat: sl(),
+      deleteChat: sl(),
+      sendMessage: sl(),
+      chatRepository: sl(),
     ),
   );
 }

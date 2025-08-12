@@ -9,51 +9,59 @@ abstract class ProductState extends Equatable {
 
 class InitialState extends ProductState {
   const InitialState();
-  
+
   @override
   List<Object?> get props => [];
 }
 
 class LoadingState extends ProductState {
   const LoadingState();
-  
+
   @override
   List<Object?> get props => [];
 }
 
 class LoadedAllProductsState extends ProductState {
   final List<Product> products;
-  
+
   const LoadedAllProductsState(this.products);
-  
+
   @override
   List<Object?> get props => [products];
 }
 
 class LoadedSingleProductState extends ProductState {
   final Product product;
-  
+
   const LoadedSingleProductState(this.product);
-  
+
   @override
   List<Object?> get props => [product];
 }
 
 class ErrorState extends ProductState {
   final String message;
-  
+
   const ErrorState(this.message);
-  
+
   @override
   List<Object?> get props => [message];
 }
 
-
 class ProductUpdatedState extends ProductState {
   final Product product;
-  
+
   const ProductUpdatedState(this.product);
-  
+
   @override
   List<Object?> get props => [product];
+}
+
+class ProductDeletedState extends ProductState {
+  final String productId;
+
+  const ProductDeletedState({required this.productId});
+
+  @override
+  List<Object?> get props => [productId];
 }

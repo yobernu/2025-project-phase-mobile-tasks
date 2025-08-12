@@ -78,78 +78,85 @@ class _SignInScreenState extends State<SignInScreen> {
         }
       },
       child: Scaffold(
-        body: Padding(
-          padding: EdgeInsets.all(46),
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 65, 0, 55),
-                child: LogoWidget(fontSize: 38, wsize: 200, hsize: 60),
-              ),
-
-              Text(
-                "Sign in to your account",
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(46),
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 95, 0, 95),
+                  child: LogoWidget(fontSize: 38, wsize: 200, hsize: 60),
                 ),
-              ),
 
-              SizedBox(height: 20),
-
-              Column(
-                children: [
-                  FormInput(
-                    title: 'email',
-                    placeholder: 'ex: john@example.com',
-                    controller: emailController,
+                Text(
+                  "Sign in to your account",
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
                   ),
-                  FormInput(
-                    title: 'password',
-                    placeholder: 'Enter your password',
-                    controller: passwordController,
-                    isPassword: true,
-                  ),
-                ],
-              ),
+                ),
 
-              SizedBox(height: 30),
+                SizedBox(height: 40),
 
-              BlocBuilder<UserBloc, UserState>(
-                builder: (context, state) {
-                  dev.log('[SIGN-IN] BlocBuilder rendering with state: $state');
-                  return SubmitButton(
-                    onPress: state is UserLoadingState ? null : _handleSignIn,
-                    title: state is UserLoadingState
-                        ? 'SIGNING IN...'
-                        : 'SIGN-IN',
-                  );
-                },
-              ),
+                Column(
+                  children: [
+                    FormInput(
+                      title: 'email',
+                      placeholder: 'ex: john@example.com',
+                      controller: emailController,
+                    ),
+                    FormInput(
+                      title: 'password',
+                      placeholder: 'Enter your password',
+                      controller: passwordController,
+                      isPassword: true,
+                    ),
+                  ],
+                ),
 
-              SizedBox(height: 20),
+                SizedBox(height: 30),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Don't have an account? "),
-                  TextButton(
-                    onPressed: () {
-                      dev.log('[SIGN-IN] Navigating to /signup-screen');
-                      Navigator.pushReplacementNamed(context, '/signup-screen');
-                    },
-                    child: Text(
-                      "SIGN-UP",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                BlocBuilder<UserBloc, UserState>(
+                  builder: (context, state) {
+                    dev.log(
+                      '[SIGN-IN] BlocBuilder rendering with state: $state',
+                    );
+                    return SubmitButton(
+                      onPress: state is UserLoadingState ? null : _handleSignIn,
+                      title: state is UserLoadingState
+                          ? 'SIGNING IN...'
+                          : 'SIGN-IN',
+                    );
+                  },
+                ),
+
+                SizedBox(height: 240),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Don't have an account? "),
+                    TextButton(
+                      onPressed: () {
+                        dev.log('[SIGN-IN] Navigating to /signup-screen');
+                        Navigator.pushReplacementNamed(
+                          context,
+                          '/signup-screen',
+                        );
+                      },
+                      child: Text(
+                        "SIGN-UP",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

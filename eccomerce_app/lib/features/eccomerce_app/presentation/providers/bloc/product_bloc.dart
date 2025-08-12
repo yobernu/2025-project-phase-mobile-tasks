@@ -93,32 +93,36 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  void _onDeleteProduct(
+  Future<void> _onDeleteProduct(
     DeleteProductEvent event,
     Emitter<ProductState> emit,
   ) async {
+    // Make sure this is async
     emit(const LoadingState());
 
-    final result = await deleteProductUsecase.call(
-      DeleteProductParams(event.productId), // 👈 Use directly
-    );
+    try {
+      final deleteResult = await deleteProductUsecase.call(
+        DeleteProductParams(event.productId),
+      );
 
-    await result.fold(
-      (failure) async {
-        emit(ErrorState(_mapFailureToMessage(failure)));
-      },
-      (_) async {
-        final productsResult = await getAllProductsUsecase.call(
-          const GetAllProductsParams(),
-        );
-        emit(
+      await deleteResult.fold(
+        (failure) async {
+          emit(ErrorState(_mapFailureToMessage(failure)));
+        },
+        (_) async {
+          final productsResult = await getAllProductsUsecase.call(
+            const GetAllProductsParams(),
+          );
+
           productsResult.fold(
-            (failure) => ErrorState(_mapFailureToMessage(failure)),
-            (products) => LoadedAllProductsState(products),
-          ),
-        );
-      },
-    );
+            (failure) => emit(ErrorState(_mapFailureToMessage(failure))),
+            (products) => emit(LoadedAllProductsState(products)),
+          );
+        },
+      );
+    } catch (e) {
+      emit(ErrorState('An unexpected error occurred'));
+    }
   }
 
   void _onCreateProduct(

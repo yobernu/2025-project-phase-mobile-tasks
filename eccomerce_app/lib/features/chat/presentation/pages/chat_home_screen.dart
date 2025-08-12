@@ -1,11 +1,11 @@
 import 'package:ecommerce_app/features/chat/presentation/pages/helpers/cards_collection.dart';
+import 'package:ecommerce_app/features/chat/presentation/pages/helpers/message_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/chat_bloc.dart';
 import '../bloc/chat_event.dart';
 import '../bloc/chat_state.dart';
 import '../../domain/entities/chat.dart';
-import 'chatting_screen.dart';
 import '../../../auth/domain/repositories/auth_repositories.dart';
 import '../../../auth/domain/entities/auth.dart';
 
@@ -16,65 +16,66 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
+// stories
 class _ChatScreenState extends State<ChatScreen> {
   final AllCards allCards = AllCards();
   bool _isLoadingUsers = false;
+  bool _isDisposed = false;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
-    // Load chats when screen initializes
-    context.read<ChatBloc>().add(LoadChats());
-    // Connect to real-time messaging
-    context.read<ChatBloc>().add(ConnectToRealTime());
-    // Load current user for cards
-    _loadCurrentUser();
+    _isDisposed = false;
+    if (mounted) {
+      context.read<ChatBloc>().add(LoadChats());
+      context.read<ChatBloc>().add(ConnectToRealTime());
+      _loadCurrentUser();
+    }
   }
 
   Future<void> _loadCurrentUser() async {
-    setState(() {
-      _isLoadingUsers = true;
-    });
+    if (_isDisposed) return;
+
+    setState(() => _isLoadingUsers = true);
 
     try {
-      // Get UserRepository from dependency injection
       final userRepository = context.read<UserRepository>();
-
-      // Get current user
       final result = await userRepository.getCurrentUser();
 
+      if (_isDisposed) return;
+
       result.fold(
-        (failure) {
-          // Handle failure - keep fallback cards
-          print('Failed to load current user: ${failure.toString()}');
-        },
+        (failure) =>
+            debugPrint('Failed to load current user: ${failure.toString()}'),
         (User user) {
-          // Add current user to cards - this uses the User import
-          allCards.addUser(user);
-          setState(() {});
+          if (!_isDisposed) {
+            _currentUserId = user.id;
+            allCards.addUser(user);
+            if (mounted) setState(() {});
+          }
         },
       );
     } catch (e) {
-      print('Error loading current user: $e');
+      if (!_isDisposed) debugPrint('Error loading current user: $e');
     } finally {
-      setState(() {
-        _isLoadingUsers = false;
-      });
+      if (!_isDisposed && mounted) {
+        setState(() => _isLoadingUsers = false);
+      }
     }
   }
 
   @override
   void dispose() {
-    // Disconnect from real-time messaging
-    context.read<ChatBloc>().add(DisconnectFromRealTime());
+    _isDisposed = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<ChatBloc>().add(DisconnectFromRealTime());
+    });
     super.dispose();
   }
 
   void _navigateToMessageScreen(Chat chat) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MessageScreen(chat: chat)),
-    );
+    Navigator.pushNamed(context, '/message-screen', arguments: chat);
   }
 
   void _showInitiateChatDialog(BuildContext context) {
@@ -88,10 +89,7 @@ class _ChatScreenState extends State<ChatScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Enter the user ID to start a chat with:',
-                style: TextStyle(fontSize: 14),
-              ),
+              const Text('Enter the user ID to start a chat with:'),
               const SizedBox(height: 16),
               TextField(
                 controller: userIdController,
@@ -136,19 +134,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _initiateNewChat(String userId) {
-    // Show loading indicator
     final scaffold = ScaffoldMessenger.of(context);
     scaffold.showSnackBar(
       const SnackBar(
         content: Row(
           children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
+            CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
             SizedBox(width: 16),
             Text('Starting new chat...'),
@@ -158,7 +151,6 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
 
-    // Add a listener to handle the error state
     context.read<ChatBloc>().stream.listen((state) {
       if (state is ChatError) {
         scaffold.hideCurrentSnackBar();
@@ -168,7 +160,6 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    // Trigger the initiate chat event
     context.read<ChatBloc>().add(InitiateNewChat(userId));
   }
 
@@ -177,27 +168,25 @@ class _ChatScreenState extends State<ChatScreen> {
     return BlocListener<ChatBloc, ChatState>(
       listener: (context, state) {
         if (state is ChatInitiated) {
-          // Hide loading and navigate to the new chat
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Chat started successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Navigate to the new chat
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Chat started successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
           _navigateToMessageScreen(state.chat);
-          // Refresh the chat list
           context.read<ChatBloc>().add(LoadChats());
         } else if (state is ChatError) {
-          // Hide loading and show error
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to start chat: ${state.message}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text('Failed to start chat: ${state.message}'),
+                backgroundColor: Colors.red,
+              ),
+            );
         }
       },
       child: Scaffold(
@@ -207,9 +196,7 @@ class _ChatScreenState extends State<ChatScreen> {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.search, color: Colors.white, size: 28),
-            onPressed: () {
-              // TODO: Implement search functionality
-            },
+            onPressed: () {},
           ),
         ),
         body: Column(
@@ -297,7 +284,11 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemCount: state.chats.length,
                         itemBuilder: (context, index) {
                           final chat = state.chats[index];
-                          return _buildChatItem(chat);
+                          return MessageCard(
+                            chat: chat,
+                            onTap: () => _navigateToMessageScreen(chat),
+                            currentUserId: _currentUserId ?? '',
+                          );
                         },
                       );
                     } else if (state is ChatError) {
@@ -317,13 +308,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                 fontSize: 16,
                                 color: Colors.red,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton(
-                              onPressed: () {
-                                context.read<ChatBloc>().add(LoadChats());
-                              },
+                              onPressed: () =>
+                                  context.read<ChatBloc>().add(LoadChats()),
                               child: const Text('Retry'),
                             ),
                           ],
@@ -345,52 +334,9 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-
-  Widget _buildChatItem(Chat chat) {
-    // Determine the chat partner (assuming current user is user1)
-    final chatPartner = chat.user2;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          radius: 25,
-          backgroundColor: Colors.blue.shade100,
-          child: Text(
-            chatPartner.name.isNotEmpty
-                ? chatPartner.name[0].toUpperCase()
-                : 'U',
-            style: TextStyle(
-              color: Colors.blue.shade800,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-        ),
-        title: Text(
-          chatPartner.name.isNotEmpty ? chatPartner.name : 'Unknown User',
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        subtitle: Text(
-          chatPartner.email,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-        ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: () => _navigateToMessageScreen(chat),
-      ),
-    );
-  }
 }
+
+
+
+
+// _min

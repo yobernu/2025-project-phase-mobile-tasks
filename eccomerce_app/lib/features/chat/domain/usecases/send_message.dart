@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
-import 'package:ecommerce_app/core/usecases/usecase.dart';
+import 'package:ecommerce_app/core/usecases/usecases.dart';
 import 'package:equatable/equatable.dart';
 import '../entities/message.dart';
 import '../repositories/chat_repository.dart';

@@ -6,6 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_bloc.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_event.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_state.dart';
+import 'package:ecommerce_app/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:ecommerce_app/features/chat/presentation/bloc/chat_event.dart';
+import 'package:ecommerce_app/features/chat/presentation/pages/chat_home_screen.dart';
 
 class DetailsScreen extends StatefulWidget {
   final Product product;
@@ -245,31 +248,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       const SizedBox(height: 24),
                       Row(
                         children: <Widget>[
-                          // DELETE BUTTON
-                          TextButton(
-                            onPressed: () => _confirmDelete(context),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 44,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              side: const BorderSide(
-                                color: Color.fromRGBO(255, 19, 19, 0.79),
-                              ),
-                            ),
-                            child: const Text(
-                              'DELETE',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                color: Color.fromRGBO(255, 19, 19, 0.79),
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
                           // UPDATE BUTTON
                           TextButton(
                             onPressed: () => _navigateToUpdate(context),
@@ -297,6 +275,31 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               ),
                             ),
                           ),
+                          const Spacer(),
+                          // DELETE BUTTON
+                          TextButton(
+                            onPressed: () => _navigateToChat(context),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 44,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: const BorderSide(
+                                color: Color.fromRGBO(255, 19, 19, 0.79),
+                              ),
+                            ),
+                            child: const Text(
+                              'CHAT - User',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Color.fromRGBO(63, 81, 243, 1),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -317,7 +320,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Delete Product'),
-              content: const Text('Are you sure you want to delete this product?'),
+              content: const Text(
+                'Are you sure you want to delete this product?',
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -325,9 +330,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red,
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
                   child: const Text('DELETE'),
                 ),
               ],
@@ -337,7 +340,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
         false;
   }
 
-  Future<bool> _handleProductDeletion(ProductBloc productBloc, String productId) async {
+  Future<bool> _handleProductDeletion(
+    ProductBloc productBloc,
+    String productId,
+  ) async {
     final completer = Completer<bool>();
     late final StreamSubscription subscription;
 
@@ -366,7 +372,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     if (!shouldDelete || !mounted) return;
 
     final productBloc = context.read<ProductBloc>();
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -376,8 +382,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
 
     try {
-      final success = await _handleProductDeletion(productBloc, widget.product.id);
-      
+      final success = await _handleProductDeletion(
+        productBloc,
+        widget.product.id,
+      );
+
       if (!mounted) return;
       Navigator.pop(context); // Close loading dialog
 
@@ -397,12 +406,47 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Future<void> _navigateToUpdate(BuildContext context) async {
-    await Navigator.pushNamed(
+    final result = await Navigator.pushNamed(
       context,
       '/product-updates',
       arguments: widget.product,
     );
-    if (mounted) setState(() {}); // Refresh if updated
+
+    if (result == true && mounted) {
+      // Trigger product refresh
+      context.read<ProductBloc>().add(LoadAllProductsEvent());
+    }
+  }
+
+  Future<void> _navigateToChat(BuildContext context) async {
+    if (!mounted) return;
+    
+    try {
+      // Ensure the chat bloc is loaded
+      final chatBloc = context.read<ChatBloc>();
+      
+      // Load chats when navigating to chat screen
+      chatBloc.add(LoadChats());
+      
+      // Navigate to the chat home screen
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ChatScreen(),
+        ),
+      );
+      
+      // Refresh the product details when returning from chat
+      if (mounted) {
+        context.read<ProductBloc>().add(LoadAllProductsEvent());
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to open chat')),
+        );
+      }
+    }
   }
 }
 // Bloclistener

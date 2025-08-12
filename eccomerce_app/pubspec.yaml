@@ -40,8 +40,7 @@ dependencies:
   path: ^1.8.3
   jwt_decoder: ^2.0.1
   flutter_secure_storage: ^8.0.0
-  
-
+  intl: ^0.19.0
   
   # State management and dependency injection
   get_it: ^7.6.7
@@ -55,6 +54,8 @@ dependencies:
   connectivity_plus: ^6.1.4
   http: ^1.2.0
   internet_connection_checker: ^3.0.1
+  socket_io_client: ^2.0.3
+  web_socket_channel: ^2.4.5  # Required for socket_io_client
   
   # Local storage
   shared_preferences: ^2.2.2
@@ -110,9 +111,10 @@ flutter:
         - asset: fonts/Poppins-Regular.ttf
         - asset: fonts/Poppins-Bold.ttf
           weight: 700
+fonts:
     - family: CaveatBrush
       fonts:
-        - asset: fonts/CaveatBrush-Regular.ttf
+        - asset: assets/fonts/CaveatBrush-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
     # - family: Trajan Pro

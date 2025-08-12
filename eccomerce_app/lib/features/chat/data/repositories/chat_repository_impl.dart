@@ -89,8 +89,12 @@ class ChatRepositoryImpl implements ChatRepository {
         return Right(messageModels.map((model) => model.toEntity()).toList());
       } catch (e) {
         try {
-          final cachedMessages = await localDataSource.getCachedMessages(chatId);
-          return Right(cachedMessages.map((model) => model.toEntity()).toList());
+          final cachedMessages = await localDataSource.getCachedMessages(
+            chatId,
+          );
+          return Right(
+            cachedMessages.map((model) => model.toEntity()).toList(),
+          );
         } catch (cacheException) {
           return Left(ServerFailure());
         }
@@ -127,7 +131,9 @@ class ChatRepositoryImpl implements ChatRepository {
         await remoteDataSource.deleteChat(chatId);
         // Remove from local cache as well
         final cachedChats = await localDataSource.getCachedChats();
-        final updatedChats = cachedChats.where((chat) => chat.id != chatId).toList();
+        final updatedChats = cachedChats
+            .where((chat) => chat.id != chatId)
+            .toList();
         await localDataSource.cacheChats(updatedChats);
         return const Right(unit);
       } catch (e) {
@@ -151,17 +157,13 @@ class ChatRepositoryImpl implements ChatRepository {
           content: content,
           type: type,
         );
-        
+
         // Cache the sent message
         await localDataSource.addCachedMessage(chatId, messageModel);
-        
+
         // Also send via socket for real-time
-        socketService.sendMessage(
-          chatId: chatId,
-          content: content,
-          type: type,
-        );
-        
+        socketService.sendMessage(chatId: chatId, content: content, type: type);
+
         return Right(messageModel.toEntity());
       } catch (e) {
         return Left(ServerFailure());
@@ -173,7 +175,9 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Stream<Message> get messageStream {
-    return socketService.messageStream.map((messageModel) => messageModel.toEntity());
+    return socketService.messageStream.map(
+      (messageModel) => messageModel.toEntity(),
+    );
   }
 
   @override

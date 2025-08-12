@@ -42,7 +42,8 @@ class Product extends Equatable {
       'id': id,
       'name': name,
       'description': description,
-      'price': price,
+      'price':
+          double.tryParse(price) ?? 0.0, // Convert string to double for API
       'imageUrl': imageUrl,
       if (subtitle != null) 'subtitle': subtitle,
       if (rating != null) 'rating': rating,

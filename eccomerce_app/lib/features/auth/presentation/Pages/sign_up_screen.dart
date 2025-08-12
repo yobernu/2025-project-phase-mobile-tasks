@@ -303,7 +303,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 240),
 
                   // Sign in link
                   TextButton(

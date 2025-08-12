@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:developer' as dev;
+import 'package:ecommerce_app/core/services/auth_services.dart';
+import 'package:ecommerce_app/features/chat/domain/entities/chat.dart';
 import 'package:http/http.dart' as http;
+// import 'package:ecommerce_app/core/constants/api_constants.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 
@@ -17,18 +20,22 @@ abstract class ChatRemoteDataSource {
   });
 }
 
+const String baseUrl =
+    "https://g5-flutter-learning-path-be-tvum.onrender.com/api/v3";
+
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   final http.Client client;
-  final String baseUrl =
-      'https://g5-flutter-learning-path-be-tvum.onrender.com/api/v3';
+  final AuthService authService;
 
-  ChatRemoteDataSourceImpl({required this.client});
+  ChatRemoteDataSourceImpl({required this.client, required this.authService});
 
-  Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    // Add authorization header when available
-    // 'Authorization': 'Bearer $token',
-  };
+  Map<String, String> get _headers {
+    final token = authService.getToken();
+    return {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
 
   @override
   Future<List<ChatModel>> getChats() async {
@@ -116,17 +123,29 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     required String content,
     required String type,
   }) async {
+    final uri = Uri.parse('$baseUrl/chats/$chatId/messages');
+    final headers = _headers;
+    final body = json.encode({'content': content, 'type': type});
+
+    // Debug logs (avoid printing token value)
+    dev.log('[ChatRemoteDataSource] POST sendMessage: url=$uri');
+    dev.log('[ChatRemoteDataSource] Headers: hasAuth=${headers.containsKey('Authorization')}, contentType=${headers['Content-Type']}');
+    dev.log('[ChatRemoteDataSource] Payload: content.length=${content.length}, type=$type');
+
     final response = await client.post(
-      Uri.parse('$baseUrl/chats/$chatId/messages'),
-      headers: _headers,
-      body: json.encode({'content': content, 'type': type}),
+      uri,
+      headers: headers,
+      body: body,
     );
+
+    dev.log('[ChatRemoteDataSource] Response: status=${response.statusCode}');
+    dev.log('[ChatRemoteDataSource] Response body: ${response.body}');
 
     if (response.statusCode == 201) {
       final jsonResponse = json.decode(response.body);
       return MessageModel.fromJson(jsonResponse['data']);
     } else {
-      throw Exception('Failed to send message');
+      throw Exception('Failed to send message: status=${response.statusCode}, body=${response.body}');
     }
   }
 }

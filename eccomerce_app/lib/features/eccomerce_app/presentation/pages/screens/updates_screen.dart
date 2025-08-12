@@ -31,6 +31,10 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
     titleController = TextEditingController(text: widget.product.name);
     subtitleController = TextEditingController(text: widget.product.subtitle);
     priceController = TextEditingController(
@@ -129,37 +133,23 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
     if (confirmed != true) return;
 
     if (!mounted) return;
+
+    // Show loading indicator
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
-    try {
-      context.read<ProductBloc>().add(DeleteProductEvent(widget.product.id));
-      if (!mounted) return;
-
-      Navigator.pop(context); // Close loading
-      Navigator.pop(context); // Go back
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Product deleted successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.pop(context); // Close loading
-      _showSnackBar('Failed to delete product: $e');
-    }
+    // Dispatch delete event
+    context.read<ProductBloc>().add(DeleteProductEvent(widget.product.id));
   }
 
   void _showSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
   }
 
   Widget _buildImageWidget() {
@@ -273,134 +263,139 @@ class _UpdatesScreenState extends State<UpdatesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ProductBloc, ProductState>(
+    return BlocConsumer<ProductBloc, ProductState>(
       listener: (context, state) {
         if (state is ErrorState) {
-          if (mounted) {
-            _showSnackBar(state.message);
-            setState(() => _isLoading = false);
-          }
-        } else if (state is ProductUpdatedState) {
-          if (mounted) {
-            Navigator.pop(context);
-            _showSnackBar('Product updated successfully');
-          }
+          Navigator.of(context).pop(); // Close loading
+          _showSnackBar(state.message);
+          setState(() => _isLoading = false);
+        } else if (state is LoadedAllProductsState) {
+          Navigator.of(context)
+            ..pop() // Close loading
+            ..pop(true); // Close update screen
+        } else if (state is ProductDeletedState) {
+          Navigator.of(context)
+            ..pop() // Close loading
+            ..pop(true); // Back to previous screen (home)
         }
       },
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 0,
+
+      builder: (context, state) {
+        return Scaffold(
           backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF3F51F3)),
-            onPressed: () => Navigator.pop(context),
-          ),
-          centerTitle: true,
-          title: const Text(
-            'Update Product',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF3E3E3E),
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Poppins',
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.white,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Color(0xFF3F51F3)),
+              onPressed: () => Navigator.pop(context),
+            ),
+            centerTitle: true,
+            title: const Text(
+              'Update Product',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF3E3E3E),
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
+              ),
             ),
           ),
-        ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Form(
-                key: _formKey,
-                child: SafeArea(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    children: <Widget>[
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          height: 190,
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF3F3F3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: _buildImageWidget(),
-                        ),
-                      ),
-                      _buildFormField('Name', titleController),
-                      _buildFormField('Category', subtitleController),
-                      _buildFormField(
-                        'Price',
-                        priceController,
-                        prefixIcon: Icons.attach_money,
-                        keyboardType: TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        isPrice: true,
-                      ),
-                      _buildFormField(
-                        'Sizes (comma separated)',
-                        sizeController,
-                        hint: '39, 40, 41, etc.',
-                      ),
-                      _buildFormField(
-                        'Rating',
-                        ratingController,
-                        keyboardType: TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                      ),
-                      _buildFormField(
-                        'Description',
-                        descriptionController,
-                        maxLines: 5,
-                      ),
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: ElevatedButton(
-                          onPressed: _submitForm,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3F51F3),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Form(
+                  key: _formKey,
+                  child: SafeArea(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            height: 190,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F3F3),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                          child: const Text(
-                            'SAVE CHANGES',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            child: _buildImageWidget(),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                        child: OutlinedButton(
-                          onPressed: _deleteProduct,
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.red),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                        _buildFormField('Name', titleController),
+                        _buildFormField('Category', subtitleController),
+                        _buildFormField(
+                          'Price',
+                          priceController,
+                          prefixIcon: Icons.attach_money,
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: true,
                           ),
-                          child: const Text(
-                            'DELETE PRODUCT',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
+                          isPrice: true,
+                        ),
+                        _buildFormField(
+                          'Sizes (comma separated)',
+                          sizeController,
+                          hint: '39, 40, 41, etc.',
+                        ),
+                        _buildFormField(
+                          'Rating',
+                          ratingController,
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                        ),
+                        _buildFormField(
+                          'Description',
+                          descriptionController,
+                          maxLines: 5,
+                        ),
+                        const SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: ElevatedButton(
+                            onPressed: _submitForm,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3F51F3),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'SAVE CHANGES',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                          child: OutlinedButton(
+                            onPressed: _deleteProduct,
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.red),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'DELETE PRODUCT',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-      ),
+        );
+      },
     );
   }
 }

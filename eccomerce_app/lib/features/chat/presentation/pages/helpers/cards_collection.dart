@@ -34,7 +34,7 @@ class AllCards {
   List<CardData> get _fallbackCards => [
     CardData(
       id: "1",
-      name: "Alexa",
+      name: "My Status",
       image: "images/avatar.png",
       hasStory: true,
     ),
@@ -88,89 +88,48 @@ class AllCards {
     return Column(
       children: [
         Container(
-          margin: EdgeInsets.only(right: 9),
+          margin: const EdgeInsets.only(right: 9),
           width: 60,
           height: 60,
           child: Stack(
             alignment: Alignment.center,
             children: [
               buildCardWithData(cardData),
+
               // Ring — either full or segmented
               CustomPaint(
-                size: Size(60, 60),
+                size: const Size(60, 60),
                 painter: useSegments
                     ? SegmentedCirclePainter(
                         segments: 3,
                         gapDegrees: 12,
-                        strokeWidth: 5,
-                        color: const Color.fromARGB(255, 39, 32, 35),
+                        strokeWidth: 1,
+                        color: const Color.fromARGB(255, 255, 255, 255),
                       )
                     : FullCirclePainter(),
               ),
+              useSegments
+                  ?
+                    // ➕ Plus Icon Overlay
+                    Positioned(
+                      bottom: 4,
+                      right: 4,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(Icons.add, size: 16, color: Colors.black),
+                      ),
+                    )
+                  : SizedBox(),
             ],
           ),
         ),
 
-        Text(cardData.name, style: TextStyle(color: Colors.white)),
+        Text(cardData.name, style: const TextStyle(color: Colors.white)),
       ],
-    );
-  }
-
-  Widget messageCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.pushReplacementNamed(context, 'message-screen'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            buildCard(),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    "Alex Linderson",
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    "How are you today?",
-                    style: TextStyle(color: Color.fromARGB(179, 57, 47, 47)),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  "2 min ago",
-                  style: TextStyle(color: const Color.fromARGB(179, 0, 0, 0)),
-                ),
-                SizedBox(height: 6),
-                Container(
-                  height: 20,
-                  width: 20,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 60, 9, 143),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    "1",
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 

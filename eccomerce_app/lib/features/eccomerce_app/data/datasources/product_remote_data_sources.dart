@@ -117,8 +117,9 @@ class ProductRemoteDataSourcesImpl implements ProductRemoteDataSources {
       request.fields['name'] = product.name;
       request.fields['description'] = product.description;
       request.fields['price'] = product.price;
-      if (product.subtitle != null)
+      if (product.subtitle != null) {
         request.fields['subtitle'] = product.subtitle!;
+      }
       if (product.rating != null) request.fields['rating'] = product.rating!;
       if (product.sizes != null && product.sizes!.isNotEmpty) {
         request.fields['sizes'] = product.sizes!.join(',');

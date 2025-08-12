@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'injection_container.dart' as chat_di;
+import '../../di_container.dart' as chat_di;
 import 'presentation/bloc/chat_bloc.dart';
 import 'presentation/pages/chat_home_screen.dart';
 
@@ -13,7 +13,7 @@ class ChatFeature {
   static Future<void> initialize() async {
     if (!_initialized) {
       try {
-        await chat_di.initChatFeature();
+        await chat_di.init();
         _initialized = true;
       } catch (e) {
         // Reset initialization flag on error so it can be retried
@@ -26,7 +26,9 @@ class ChatFeature {
   /// Get the main chat page wrapped with BlocProvider
   static Widget getChatPage() {
     if (!_initialized) {
-      throw Exception('ChatFeature must be initialized before use. Call ChatFeature.initialize() first.');
+      throw Exception(
+        'ChatFeature must be initialized before use. Call ChatFeature.initialize() first.',
+      );
     }
 
     return BlocProvider(
@@ -37,16 +39,15 @@ class ChatFeature {
 
   /// Get a chat page with custom BlocProvider for more control
   static Widget getChatPageWithCustomBloc(ChatBloc chatBloc) {
-    return BlocProvider.value(
-      value: chatBloc,
-      child: const ChatScreen(),
-    );
+    return BlocProvider.value(value: chatBloc, child: const ChatScreen());
   }
 
   /// Create a new ChatBloc instance
   static ChatBloc createChatBloc() {
     if (!_initialized) {
-      throw Exception('ChatFeature must be initialized before use. Call ChatFeature.initialize() first.');
+      throw Exception(
+        'ChatFeature must be initialized before use. Call ChatFeature.initialize() first.',
+      );
     }
     return chat_di.sl<ChatBloc>();
   }
@@ -54,7 +55,7 @@ class ChatFeature {
 
 /// Example integration widget showing how to use the chat feature
 class ChatIntegrationExample extends StatefulWidget {
-  const ChatIntegrationExample({Key? key}) : super(key: key);
+  const ChatIntegrationExample({super.key});
 
   @override
   State<ChatIntegrationExample> createState() => _ChatIntegrationExampleState();
@@ -106,11 +107,7 @@ class _ChatIntegrationExampleState extends State<ChatIntegrationExample> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
                 'Failed to initialize chat feature',
