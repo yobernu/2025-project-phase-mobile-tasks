@@ -40,7 +40,7 @@ void main() {
     mockDeleteProduct = MockDeleteProduct();
     mockInsertProduct = MockInsertProduct();
     mockInputConverter = MockInputConverter();
-    
+
     bloc = ProductBloc(
       getAllProductsUsecase: mockGetAllProducts,
       getSingleProductUsecase: mockGetProductById,
@@ -60,139 +60,164 @@ void main() {
   });
 
   group('LoadAllProductsEvent', () {
-    test('should emit [LoadingState, LoadedAllProductsState] when data is gotten successfully', () async {
-      // arrange
-      final tProducts = [
-        const Product(
-          id: 1,
-          imagePath: 'test.jpg',
-          title: 'Test Product',
-          subtitle: 'Test Subtitle',
-          price: '100',
-          sizes: ['S', 'M', 'L'],
-          description: 'Test Description',
-        ),
-      ];
-      
-      when(mockGetAllProducts.call(any))
-          .thenAnswer((_) async => Right(tProducts));
+    test(
+      'should emit [LoadingState, LoadedAllProductsState] when data is gotten successfully',
+      () async {
+        // arrange
+        final tProducts = [
+          const Product(
+            id: '1',
+            name: 'Test Product',
+            subtitle: 'Test Subtitle',
+            price: 100,
+            sizes: ['S', 'M', 'L'],
+            description: 'Test Description',
+            imageUrl: 'test.jpg',
+          ),
+        ];
 
-      // assert later
-      final expected = [
-        const LoadingState(),
-        LoadedAllProductsState(tProducts),
-      ];
-      expectLater(bloc.stream, emitsInOrder(expected));
+        when(
+          mockGetAllProducts.call(any),
+        ).thenAnswer((_) async => Right(tProducts));
 
-      // act
-      bloc.add(const LoadAllProductsEvent());
-    });
+        // assert later
+        final expected = [
+          const LoadingState(),
+          LoadedAllProductsState(tProducts),
+        ];
+        expectLater(bloc.stream, emitsInOrder(expected));
 
-    test('should emit [LoadingState, ErrorState] when getting data fails', () async {
-      // arrange
-      when(mockGetAllProducts.call(any))
-          .thenAnswer((_) async => const Left(ServerFailure()));
+        // act
+        bloc.add(const LoadAllProductsEvent());
+      },
+    );
 
-      // assert later
-      final expected = [
-        const LoadingState(),
-        const ErrorState('Server Failure'),
-      ];
-      expectLater(bloc.stream, emitsInOrder(expected));
+    test(
+      'should emit [LoadingState, ErrorState] when getting data fails',
+      () async {
+        // arrange
+        when(
+          mockGetAllProducts.call(any),
+        ).thenAnswer((_) async => const Left(ServerFailure()));
 
-      // act
-      bloc.add(const LoadAllProductsEvent());
-    });
+        // assert later
+        final expected = [
+          const LoadingState(),
+          const ErrorState('Server Failure'),
+        ];
+        expectLater(bloc.stream, emitsInOrder(expected));
+
+        // act
+        bloc.add(const LoadAllProductsEvent());
+      },
+    );
   });
 
   group('GetSingleProductEvent', () {
     const tProductId = '1';
     const tProduct = Product(
-      id: 1,
-      imagePath: 'test.jpg',
-      title: 'Test Product',
+      id: '1',
+      name: 'Test Product',
       subtitle: 'Test Subtitle',
-      price: '100',
+      price: 100,
       sizes: ['S', 'M', 'L'],
       description: 'Test Description',
+      imageUrl: 'test.jpg',
     );
 
-    test('should emit [LoadingState, LoadedSingleProductState] when data is gotten successfully', () async {
-      // arrange
-      when(mockInputConverter.stringToUnsignedInteger(tProductId))
-          .thenReturn(const Right(1));
-      when(mockGetProductById.call(any))
-          .thenAnswer((_) async => Right(tProduct));
+    test(
+      'should emit [LoadingState, LoadedSingleProductState] when data is gotten successfully',
+      () async {
+        // arrange
+        when(
+          mockInputConverter.stringToUnsignedInteger(tProductId),
+        ).thenReturn(const Right(1));
+        when(
+          mockGetProductById.call(any),
+        ).thenAnswer((_) async => Right(tProduct));
 
-      // assert later
-      final expected = [
-        const LoadingState(),
-        LoadedSingleProductState(tProduct),
-      ];
-      expectLater(bloc.stream, emitsInOrder(expected));
+        // assert later
+        final expected = [
+          const LoadingState(),
+          LoadedSingleProductState(tProduct),
+        ];
+        expectLater(bloc.stream, emitsInOrder(expected));
 
-      // act
-      bloc.add(const GetSingleProductEvent(tProductId));
-    });
+        // act
+        bloc.add(const GetSingleProductEvent(tProductId));
+      },
+    );
 
-    test('should emit [LoadingState, ErrorState] when input is invalid', () async {
-      // arrange
-      when(mockInputConverter.stringToUnsignedInteger(tProductId))
-          .thenReturn(const Left(InvalidInputFailure()));
+    test(
+      'should emit [LoadingState, ErrorState] when input is invalid',
+      () async {
+        // arrange
+        when(
+          mockInputConverter.stringToUnsignedInteger(tProductId),
+        ).thenReturn(const Left(InvalidInputFailure()));
 
-      // assert later
-      final expected = [
-        const LoadingState(),
-        const ErrorState('Invalid Input'),
-      ];
-      expectLater(bloc.stream, emitsInOrder(expected));
+        // assert later
+        final expected = [
+          const LoadingState(),
+          const ErrorState('Invalid Input'),
+        ];
+        expectLater(bloc.stream, emitsInOrder(expected));
 
-      // act
-      bloc.add(const GetSingleProductEvent(tProductId));
-    });
+        // act
+        bloc.add(const GetSingleProductEvent(tProductId));
+      },
+    );
   });
 
   group('CreateProductEvent', () {
     const tProduct = Product(
-      id: 1,
-      imagePath: 'test.jpg',
-      title: 'Test Product',
+      id: '1',
+      name: 'Test Product',
       subtitle: 'Test Subtitle',
-      price: '100',
+      price: 100,
       sizes: ['S', 'M', 'L'],
       description: 'Test Description',
+      imageUrl: 'test.jpg',
     );
 
-    test('should emit [LoadingState, LoadedAllProductsState] when product is created successfully', () async {
-      // arrange
-      when(mockInsertProduct.call(any))
-          .thenAnswer((_) async => const Right(null));
+    test(
+      'should emit [LoadingState, LoadedAllProductsState] when product is created successfully',
+      () async {
+        // arrange
+        when(
+          mockInsertProduct.call(any),
+        ).thenAnswer((_) async => const Right(null));
 
-      // assert later
-      final expected = [
-        const LoadingState(),
-        const LoadedAllProductsState([]),
-      ];
-      expectLater(bloc.stream, emitsInOrder(expected));
+        // assert later
+        final expected = [
+          const LoadingState(),
+          const LoadedAllProductsState([]),
+        ];
+        expectLater(bloc.stream, emitsInOrder(expected));
 
-      // act
-      bloc.add(const CreateProductEvent(tProduct));
-    });
+        // act
+        bloc.add(const CreateProductEvent(tProduct));
+      },
+    );
 
-    test('should emit [LoadingState, ErrorState] when creation fails', () async {
-      // arrange
-      when(mockInsertProduct.call(any))
-          .thenAnswer((_) async => const Left(ServerFailure()));
+    test(
+      'should emit [LoadingState, ErrorState] when creation fails',
+      () async {
+        // arrange
+        when(
+          mockInsertProduct.call(any),
+        ).thenAnswer((_) async => const Left(ServerFailure()));
 
-      // assert later
-      final expected = [
-        const LoadingState(),
-        const ErrorState('Server Failure'),
-      ];
-      expectLater(bloc.stream, emitsInOrder(expected));
+        // assert later
+        final expected = [
+          const LoadingState(),
+          const ErrorState('Server Failure'),
+        ];
+        expectLater(bloc.stream, emitsInOrder(expected));
 
-      // act
-      bloc.add(const CreateProductEvent(tProduct));
-    });
+        // act
+        bloc.add(const CreateProductEvent(tProduct));
+      },
+    );
   });
 }
