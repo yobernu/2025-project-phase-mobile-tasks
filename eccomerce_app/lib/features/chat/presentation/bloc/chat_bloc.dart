@@ -36,6 +36,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<LoadChats>(_onLoadChats);
     on<LoadChatById>(_onLoadChatById);
     on<LoadChatMessages>(_onLoadChatMessages);
+    on<ShowChatMessagesEmpty>(_onShowChatMessagesEmpty);
     on<InitiateNewChat>(_onInitiateNewChat);
     on<DeleteChatEvent>(_onDeleteChat);
     on<SendMessageEvent>(_onSendMessage);
@@ -84,6 +85,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
   }
 
+  Future<void> _onShowChatMessagesEmpty(
+    ShowChatMessagesEmpty event,
+    Emitter<ChatState> emit,
+  ) async {
+    // Immediately show an empty list for the chat without hitting HTTP
+    emit(ChatMessagesLoaded(chatId: event.chatId, messages: const []));
+  }
+
   Future<void> _onInitiateNewChat(
     InitiateNewChat event,
     Emitter<ChatState> emit,
@@ -116,8 +125,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     SendMessageEvent event,
     Emitter<ChatState> emit,
   ) async {
-    dev.log('[ChatBloc] _onSendMessage: chatId=${event.chatId}, '
-        'content.length=${event.content.length}, type=${event.type}');
+    dev.log(
+      '[ChatBloc] _onSendMessage: chatId=${event.chatId}, '
+      'content.length=${event.content.length}, type=${event.type}',
+    );
+
     final result = await sendMessage(
       SendMessageParams(
         chatId: event.chatId,
@@ -134,6 +146,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       },
       (message) {
         dev.log('[ChatBloc] _onSendMessage SUCCESS: messageId=${message.id}');
+
+        // Optimistic update: append message to current list if loaded
+        final currentState = state;
+        final targetChatId = message.chatId;
+        if (currentState is ChatMessagesLoaded &&
+            currentState.chatId == targetChatId) {
+          final updated = List.of(currentState.messages)..add(message);
+          emit(ChatMessagesLoaded(chatId: targetChatId, messages: updated));
+        } else {
+          // If not currently viewing loaded messages for this chat, create a new list
+          emit(ChatMessagesLoaded(chatId: targetChatId, messages: [message]));
+        }
+
         emit(MessageSent(message));
       },
     );
@@ -148,7 +173,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       // Listen to real-time messages
       _messageSubscription = chatRepository.messageStream.listen((message) {
-        add(NewMessageReceived(messageId: message.id, chatId: message.chat.id));
+        add(NewMessageReceived(message));
       });
 
       emit(RealTimeConnected());
@@ -175,14 +200,27 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     NewMessageReceived event,
     Emitter<ChatState> emit,
   ) async {
-    // Reload messages for the specific chat
-    final result = await getChatMessages(event.chatId);
-
-    result.fold(
-      (failure) => emit(ChatError(_mapFailureToMessage(failure))),
-      (messages) =>
-          emit(ChatMessagesLoaded(chatId: event.chatId, messages: messages)),
-    );
+    // Merge incoming socket message: replace matching provisional (temp-*) or append
+    final incoming = event.message;
+    final currentState = state;
+    if (currentState is ChatMessagesLoaded &&
+        currentState.chatId == incoming.chatId) {
+      final updated = List.of(currentState.messages);
+      final idx = updated.indexWhere((m) =>
+          m.id.startsWith('temp-') &&
+          m.chatId == incoming.chatId &&
+          m.sender.id == incoming.sender.id &&
+          m.content == incoming.content);
+      if (idx != -1) {
+        updated[idx] = incoming; // replace provisional with delivered
+      } else {
+        updated.add(incoming);
+      }
+      emit(ChatMessagesLoaded(chatId: currentState.chatId, messages: updated));
+    } else {
+      // If no messages loaded yet for this chat, start a new list
+      emit(ChatMessagesLoaded(chatId: incoming.chatId, messages: [incoming]));
+    }
   }
 
   String _mapFailureToMessage(failure) {

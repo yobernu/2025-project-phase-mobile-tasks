@@ -58,7 +58,7 @@ Future<void> init() async {
   //! External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
-  
+
   // Socket Service
   sl.registerLazySingleton<SocketService>(() => SocketService.instance);
 
@@ -138,10 +138,7 @@ Future<void> init() async {
   //! Features - Chat
   // Data sources
   sl.registerLazySingleton<ChatRemoteDataSource>(
-    () => ChatRemoteDataSourceImpl(
-      client: sl(),
-      authService: sl(), // If you need authentication
-    ),
+    () => ChatRemoteDataSourceImpl(client: sl(), authService: sl()),
   );
 
   sl.registerLazySingleton<ChatLocalDataSource>(

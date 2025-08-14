@@ -1,10 +1,21 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/message.dart';
 
 abstract class ChatEvent extends Equatable {
   const ChatEvent();
 
   @override
   List<Object?> get props => [];
+}
+
+// Emits an empty ChatMessagesLoaded state (or cached data if you decide to extend handler)
+class ShowChatMessagesEmpty extends ChatEvent {
+  final String chatId;
+
+  const ShowChatMessagesEmpty(this.chatId);
+
+  @override
+  List<Object?> get props => [chatId];
 }
 
 class LoadChats extends ChatEvent {}
@@ -65,14 +76,10 @@ class ConnectToRealTime extends ChatEvent {}
 class DisconnectFromRealTime extends ChatEvent {}
 
 class NewMessageReceived extends ChatEvent {
-  final String messageId;
-  final String chatId;
+  final Message message;
 
-  const NewMessageReceived({
-    required this.messageId,
-    required this.chatId,
-  });
+  const NewMessageReceived(this.message);
 
   @override
-  List<Object?> get props => [messageId, chatId];
+  List<Object?> get props => [message];
 }

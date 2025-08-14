@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 import 'package:dartz/dartz.dart';
 import 'package:ecommerce_app/core/errors/failures.dart';
 import 'package:ecommerce_app/core/network/network_info.dart';
@@ -8,6 +9,8 @@ import '../../domain/repositories/chat_repository.dart';
 import '../datasources/chat_remote_data_source.dart';
 import '../datasources/chat_local_data_source.dart';
 import '../services/socket_service.dart';
+import '../models/message_model.dart';
+import '../models/user_model.dart';
 
 class ChatRepositoryImpl implements ChatRepository {
   final ChatRemoteDataSource remoteDataSource;
@@ -116,7 +119,8 @@ class ChatRepositoryImpl implements ChatRepository {
         final chatModel = await remoteDataSource.initiateChat(userId);
         await localDataSource.cacheChatById(chatModel.id, chatModel);
         return Right(chatModel.toEntity());
-      } catch (e) {
+      } catch (e, stackTrace) {
+        dev.log('Initiate chat failed: $e', stackTrace: stackTrace);
         return Left(ServerFailure());
       }
     } else {
@@ -136,7 +140,8 @@ class ChatRepositoryImpl implements ChatRepository {
             .toList();
         await localDataSource.cacheChats(updatedChats);
         return const Right(unit);
-      } catch (e) {
+      } catch (e, st) {
+        dev.log('sendMessage repo error: $e', stackTrace: st);
         return Left(ServerFailure());
       }
     } else {
@@ -150,26 +155,48 @@ class ChatRepositoryImpl implements ChatRepository {
     required String content,
     required String type,
   }) async {
-    if (await networkInfo.isConnected) {
+    // Socket-first implementation (backend send endpoint is unreliable)
+    try {
+      // Attempt to get cached chat to determine current user as sender
+      final cachedChat = await localDataSource.getCachedChatById(chatId);
+      final senderModel = cachedChat?.user1 ??
+          UserModel(id: 'me', name: 'Me', email: 'me@example.com');
+
+      // Map string type to MessageType
+      final msgType = () {
+        switch (type.toLowerCase()) {
+          case 'image':
+            return MessageType.image;
+          case 'file':
+            return MessageType.file;
+          default:
+            return MessageType.text;
+        }
+      }();
+
+      final provisional = MessageModel(
+        id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
+        sender: senderModel,
+        chatId: chatId,
+        content: content,
+        type: msgType,
+        createdAt: DateTime.now(),
+      );
+
+      // Cache optimistically
+      await localDataSource.addCachedMessage(chatId, provisional);
+
+      // Emit via socket for real-time delivery
       try {
-        final messageModel = await remoteDataSource.sendMessage(
-          chatId: chatId,
-          content: content,
-          type: type,
-        );
-
-        // Cache the sent message
-        await localDataSource.addCachedMessage(chatId, messageModel);
-
-        // Also send via socket for real-time
         socketService.sendMessage(chatId: chatId, content: content, type: type);
-
-        return Right(messageModel.toEntity());
       } catch (e) {
-        return Left(ServerFailure());
+        dev.log('Socket send failed: $e');
       }
-    } else {
-      return Left(NetworkFailure());
+
+      return Right(provisional.toEntity());
+    } catch (e, st) {
+      dev.log('sendMessage (socket-only) failed: $e', stackTrace: st);
+      return Left(ServerFailure());
     }
   }
 

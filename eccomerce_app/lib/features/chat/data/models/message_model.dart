@@ -1,12 +1,24 @@
 import '../../domain/entities/message.dart';
 import 'user_model.dart';
-import 'chat_model.dart';
+
+MessageType _parseType(String? raw) {
+  switch ((raw ?? '').toLowerCase()) {
+    case 'text':
+      return MessageType.text;
+    case 'image':
+      return MessageType.image;
+    case 'file':
+      return MessageType.file;
+    default:
+      return MessageType.text;
+  }
+}
 
 class MessageModel extends Message {
   const MessageModel({
     required super.id,
     required super.sender,
-    required super.chat,
+    required super.chatId,
     required super.content,
     required super.type,
     required super.createdAt,
@@ -16,26 +28,23 @@ class MessageModel extends Message {
     return MessageModel(
       id: json['_id'] as String,
       sender: UserModel.fromJson(json['sender'] as Map<String, dynamic>),
-      chat: ChatModel.fromJson(json['chat'] as Map<String, dynamic>),
+      chatId: json['chatId'] as String,
       content: json['content'] as String,
-      type: _parseMessageType(json['type'] as String),
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      type: _parseType(json['type'] as String),
+      createdAt: DateTime.parse(
+        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      ),
     );
-  }
-
-  static MessageType _parseMessageType(String type) {
-    switch (type.toLowerCase()) {
-      case 'text':
-        return MessageType.text;
-      default:
-        return MessageType.text;
-    }
   }
 
   static String _messageTypeToString(MessageType type) {
     switch (type) {
       case MessageType.text:
         return 'text';
+      case MessageType.image:
+        return 'image';
+      case MessageType.file:
+        return 'file';
     }
   }
 
@@ -43,7 +52,7 @@ class MessageModel extends Message {
     return {
       '_id': id,
       'sender': (sender as UserModel).toJson(),
-      'chat': (chat as ChatModel).toJson(),
+      'chatId': chatId,
       'content': content,
       'type': _messageTypeToString(type),
       'createdAt': createdAt.toIso8601String(),
@@ -54,7 +63,7 @@ class MessageModel extends Message {
     return Message(
       id: id,
       sender: sender,
-      chat: chat,
+      chatId: chatId,
       content: content,
       type: type,
       createdAt: createdAt,

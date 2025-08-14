@@ -1,4 +1,5 @@
 // core/services/auth_service.dart
+import 'package:ecommerce_app/features/chat/data/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
