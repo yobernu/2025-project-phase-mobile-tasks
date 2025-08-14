@@ -16,6 +16,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/helpers/image_picker.dart';
 
 Future<void> init() async {
   final ls = GetIt.instance;
@@ -40,15 +41,21 @@ Future<void> init() async {
   ls.registerLazySingleton(() => InsertProduct(ls()));
 
   // Repositories
-  ls.registerLazySingleton<ProductRepository>(() => ProductRepositoryImpl(
-    remoteDataSource: ls(),
-    localDataSource: ls(),
-    networkInfo: ls(),
-  ));
+  ls.registerLazySingleton<ProductRepository>(
+    () => ProductRepositoryImpl(
+      remoteDataSource: ls(),
+      localDataSource: ls(),
+      networkInfo: ls(),
+    ),
+  );
 
   // Data sources
-  ls.registerLazySingleton<ProductRemoteDataSources>(() => ProductRemoteDataSourcesImpl(client: ls()));
-  ls.registerLazySingleton<ProductLocalDataSources>(() => ProductLocalDataSourcesImpl(sharedPreferences: ls()));
+  ls.registerLazySingleton<ProductRemoteDataSources>(
+    () => ProductRemoteDataSourcesImpl(client: ls()),
+  );
+  ls.registerLazySingleton<ProductLocalDataSources>(
+    () => ProductLocalDataSourcesImpl(sharedPreferences: ls()),
+  );
 
   // Core
   ls.registerLazySingleton(() => InputConverter());
@@ -57,14 +64,18 @@ Future<void> init() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   ls.registerLazySingleton(() => sharedPreferences);
   ls.registerLazySingleton(() => http.Client());
-  ls.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(internetConnectionChecker: ls()));
+  ls.registerLazySingleton<NetworkInfo>(
+    () => NetworkInfoImpl(internetConnectionChecker: ls()),
+  );
   ls.registerLazySingleton(() => InternetConnectionChecker.createInstance());
-  
+
   // Image picker for screenshot functionality
   ls.registerLazySingleton(() => ImagePicker());
-  
+  // Image picker service used in CreateScreen
+  ls.registerLazySingleton<ImagePickerService>(
+    () => ImagePickerService(picker: ls()),
+  );
+
   // Path provider for file storage
   ls.registerLazySingleton(() => getApplicationDocumentsDirectory());
 }
-
-

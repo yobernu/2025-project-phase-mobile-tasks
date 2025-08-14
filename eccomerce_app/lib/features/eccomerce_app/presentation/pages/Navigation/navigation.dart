@@ -1,9 +1,9 @@
 import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/create_screen.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/details_screen.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/helpers/image_picker.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/home_screen.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/pages/screens/updates_screen.dart';
 import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_bloc.dart';
-
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,13 +42,15 @@ class Navigation {
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
             create: (_) => injector<ProductBloc>(),
-            child: CreateScreen(),
-            ));
+            child: CreateScreen(
+              imagePickerService: injector<ImagePickerService>(),
+            ),
+          ),
+        );
       default:
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Route not found')),
-          ),
+          builder: (_) =>
+              const Scaffold(body: Center(child: Text('Route not found'))),
         );
     }
   }

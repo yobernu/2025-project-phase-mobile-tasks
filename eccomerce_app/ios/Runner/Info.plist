@@ -45,5 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Photo Library usage for image picking -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photos to select a product image.</string>
 </dict>
 </plist>
