@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
 
+import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart' as _i3;
 import 'package:ecommerce_app/core/errors/failures.dart' as _i6;
 import 'package:ecommerce_app/core/utils/input_converter.dart' as _i12;
@@ -22,6 +23,9 @@ import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/insert_prod
     as _i11;
 import 'package:ecommerce_app/features/eccomerce_app/domain/usecases/update_product.dart'
     as _i9;
+import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_bloc.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_event.dart';
+import 'package:ecommerce_app/features/eccomerce_app/presentation/providers/bloc/product_state.dart';
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint

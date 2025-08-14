@@ -38,6 +38,7 @@ class _CreateScreenState extends State<CreateScreen> {
     sizeController = TextEditingController();
   }
 
+  // addProductButton
   @override
   void dispose() {
     titleController.dispose();
@@ -223,7 +224,7 @@ class _CreateScreenState extends State<CreateScreen> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: ElevatedButton(
-                              key: const Key('addProductButton'),
+                              key: const Key('addProductsButton'),
                               onPressed: _submitForm,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF3F51F3),

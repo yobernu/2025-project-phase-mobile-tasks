@@ -50,6 +50,16 @@ void main() {
       inputConverter: mockInputConverter,
     );
   });
+  const tProductId = '1';
+  const tProduct = Product(
+    id: '1',
+    name: 'Test Product',
+    subtitle: 'Test Subtitle',
+    price: 100,
+    sizes: ['S', 'M', 'L'],
+    description: 'Test Description',
+    imageUrl: 'test.jpg',
+  );
 
   tearDown(() {
     bloc.close();
@@ -63,27 +73,14 @@ void main() {
     test(
       'should emit [LoadingState, LoadedAllProductsState] when data is gotten successfully',
       () async {
-        // arrange
-        final tProducts = [
-          const Product(
-            id: '1',
-            name: 'Test Product',
-            subtitle: 'Test Subtitle',
-            price: 100,
-            sizes: ['S', 'M', 'L'],
-            description: 'Test Description',
-            imageUrl: 'test.jpg',
-          ),
-        ];
-
         when(
           mockGetAllProducts.call(any),
-        ).thenAnswer((_) async => Right(tProducts));
+        ).thenAnswer((_) async => Right([tProduct]));
 
         // assert later
         final expected = [
           const LoadingState(),
-          LoadedAllProductsState(tProducts),
+          LoadedAllProductsState([tProduct]),
         ];
         expectLater(bloc.stream, emitsInOrder(expected));
 
@@ -114,17 +111,6 @@ void main() {
   });
 
   group('GetSingleProductEvent', () {
-    const tProductId = '1';
-    const tProduct = Product(
-      id: '1',
-      name: 'Test Product',
-      subtitle: 'Test Subtitle',
-      price: 100,
-      sizes: ['S', 'M', 'L'],
-      description: 'Test Description',
-      imageUrl: 'test.jpg',
-    );
-
     test(
       'should emit [LoadingState, LoadedSingleProductState] when data is gotten successfully',
       () async {
@@ -170,16 +156,6 @@ void main() {
   });
 
   group('CreateProductEvent', () {
-    const tProduct = Product(
-      id: '1',
-      name: 'Test Product',
-      subtitle: 'Test Subtitle',
-      price: 100,
-      sizes: ['S', 'M', 'L'],
-      description: 'Test Description',
-      imageUrl: 'test.jpg',
-    );
-
     test(
       'should emit [LoadingState, LoadedAllProductsState] when product is created successfully',
       () async {
