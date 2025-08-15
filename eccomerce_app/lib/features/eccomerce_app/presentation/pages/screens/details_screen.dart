@@ -15,6 +15,7 @@ class DetailsScreen extends StatefulWidget {
   State<DetailsScreen> createState() => _DetailsScreenState();
 }
 
+// icon navigator
 class _DetailsScreenState extends State<DetailsScreen> {
   int selectedIndex = 0;
 
@@ -27,7 +28,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Widget _buildImage() {
     final imageUrl = widget.product.imageUrl;
-    
+
     if (imageUrl.isEmpty) {
       return const Icon(Icons.image, size: 50, color: Colors.grey);
     }
@@ -41,7 +42,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
+                        loadingProgress.expectedTotalBytes!
                   : null,
             ),
           );
@@ -59,7 +60,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Widget _buildSizeSelector() {
     final sizes = widget.product.sizes;
-    
+
     if (sizes == null || sizes.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -69,10 +70,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       children: [
         const Text(
           'Size:',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 20,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -148,6 +146,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
+                      key: const Key('back_button'),
                       child: Container(
                         margin: const EdgeInsets.all(24),
                         width: 40,
@@ -216,8 +215,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             '\$${widget.product.price.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w500,
-                              fontSize: 16),
+                              fontSize: 16,
                             ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -235,7 +235,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 44,
-                                vertical: 12),
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -257,10 +258,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           TextButton(
                             onPressed: () => _navigateToUpdate(context),
                             style: TextButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(63, 81, 243, 1),
+                              backgroundColor: const Color.fromRGBO(
+                                63,
+                                81,
+                                243,
+                                1,
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 44,
-                                vertical: 12),
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -316,9 +323,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
 
     try {
-      context.read<ProductBloc>().add(
-        DeleteProductEvent(widget.product.id),
-      );
+      context.read<ProductBloc>().add(DeleteProductEvent(widget.product.id));
 
       if (!mounted) return;
       Navigator.pop(context); // Close loading
@@ -326,7 +331,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Product deleted successfully'),
-          backgroundColor: Colors.green),
+          backgroundColor: Colors.green,
+        ),
       );
 
       Navigator.pop(context); // Go back
